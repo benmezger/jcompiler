@@ -1,0 +1,141 @@
+options {
+    IGNORE_CASE = true;
+    JAVA_UNICODE_ESCAPE = true;
+    STATIC = true;
+    DEBUG_PARSER = true;
+}
+
+PARSER_BEGIN(LanguageParser)
+package compiler.parser;
+
+import java.util.List;
+import java.util.ArrayList;
+
+public class LanguageParser {
+
+    public LanguageParser(){
+        ;;
+    }
+
+    public static void main(String args[]) throws TokenMgrError, ParseException {
+        LanguageParser parser = null;
+
+        if (args.length == 0) {
+            parser = new LanguageParser(System.in);
+        }
+        else if (args.length == 1) {
+            try {
+                parser = new LanguageParser(new java.io.FileInputStream(args[0]));
+            }
+            catch (java.io.FileNotFoundException e) {
+                System.out.println("LanguageParser: file " + args[0] + " was not found.");
+                return;
+            }
+        }
+
+        parser.program();
+
+        for (Token token: tokenize(parser)){
+            String name = LanguageParserConstants.tokenImage[token.kind];
+            System.out.println("Line " + token.beginLine + " | Column " + token.beginColumn + " | " + token + "\n");
+        }
+
+       // for(Token token = getNextToken(); token.kind != EOF; token = getNextToken()){
+       //     System.out.println(token.image);
+       // }
+    }
+
+    public static List<Token> tokenize(LanguageParser parser){
+        List<Token> tokens = new ArrayList<>();
+
+        Token token = parser.getNextToken();
+        while (token.kind != LanguageParserConstants.EOF){
+            tokens.add(token);
+            token = parser.getNextToken();
+        }
+        return tokens;
+    }
+}
+PARSER_END(LanguageParser)
+
+SKIP: {
+    " "
+    | "\n"
+    | "\t"
+}
+
+/* Keywords */
+TOKEN: {
+    <INTEGER: "integer">
+    | <REAL: "real">
+    | <STRING: "string">
+    | <TRUE: "true">
+    | <UNTRUE: "untrue">
+    | <DO_THIS: "do this">
+    | <DESCRIPTION: "description">
+    | <BODY: "body">
+    | <IS: "is">
+    | <AS: "as">
+    | <AS_CONSTANT: "as constant">
+    | <AS_VARIABLE: "as variable">
+    | <DESIGNATE_THIS: "designate this">
+    | <READ_THIS: "read this">
+    | <WRITE_ALL_THIS: "write all this">
+    | <WRITE_THIS: "write this">
+    | <AVALIATE_THIS: "avaliate this">
+    | <UNTRUE_RESULT: "untrue result">
+    | <TRUE_RESULT: "true result">
+    | <REPEATE_THIS: "repeat this">
+    | <DECLARATION_CONSTANT_AND_VARIABLE: "declaration constant and variable">
+    | <DECLARATION_TYPE: "declaration type">
+}
+
+/* Operators, relations, etc*/
+TOKEN: {
+    <PLUS : "+">
+    | <MINUS : "-">
+    | <MULTIPLY : "*">
+    | <DIV : "/">
+    | <POWER : "**">
+    | <WHOLE_DIV : "%">
+    | <REST_DIV: "%%">
+    | <EQUAL_TO: "==">
+    | <DIFF_THAN: "!=">
+    | <LESS_THAN: "<<">
+    | <GREATER_THAN: ">>">
+    | <LESS_THAN_OR_EQ_TO: "<<=">
+    | <GREATER_THAN_OR_EQ_TO: ">>=">
+    | <OPEN_BRACKET: "[">
+    | <CLOSE_BRACKET: "]">
+    | <DOT: ".">
+}
+
+/* Logical Operators */
+TOKEN: {
+    <AND : "&">
+    | <OR : "|">
+    | <NOT: "!">
+}
+
+/* Numbers  */
+TOKEN:  {
+    < NUM : (<MINUS>)? (<DIGIT>)+ >
+    | < DOUBLE : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+) >
+    | < #DIGIT : ["0" - "9"] >
+}
+
+/* Identifiers */
+TOKEN: {
+    <IDENTIFIER : (<LETTER>|<DIGIT>|"_")+>
+    | <#LETTER : ["a"-"z","A"-"Z"]>
+    | <#DIGITS : (["0"-"9"])+>
+}
+
+void program() : {} {
+    function()
+}
+
+/* Production rules */
+void function() : {} {
+    <DO_THIS> <IDENTIFIER> <OPEN_BRACKET> <CLOSE_BRACKET> <EOF>
+}
