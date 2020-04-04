@@ -1,20 +1,24 @@
 options {
     IGNORE_CASE = true;
     JAVA_UNICODE_ESCAPE = true;
-    STATIC = true;
+    STATIC = false;
     DEBUG_PARSER = true;
 }
 
 PARSER_BEGIN(LanguageParser)
 package compiler.parser;
 
-import java.util.List;
+import javax.swing.text.html.parser.Parser;import java.util.List;
 import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 public class LanguageParser {
 
-    public LanguageParser(){
-        ;;
+    public static List<Token> getTokens(String stream){
+        InputStream target =  new ByteArrayInputStream(stream.getBytes());
+        LanguageParser parser = new LanguageParser(target);
+        return tokenize(parser);
     }
 
     public static void main(String args[]) throws TokenMgrError, ParseException {
