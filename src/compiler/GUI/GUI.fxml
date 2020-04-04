@@ -2,68 +2,58 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/11.0.1" fx:controller="compiler.GUI.Controller">
+<?import org.fxmisc.richtext.*?>
+
+<AnchorPane fx:id="rootAnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="compiler.GUI.Controller">
     <children>
-        <MenuBar layoutX="10.0" layoutY="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                 AnchorPane.topAnchor="0.0">
+        <MenuBar layoutX="10.0" layoutY="10.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#newFileActionHandler" text="Novo"/>
-                        <MenuItem mnemonicParsing="false" onAction="#openFileActionHandler" text="Abrir"/>
-                        <MenuItem mnemonicParsing="false" onAction="#saveAsActionHandler" text="Salvar como"/>
-                        <MenuItem mnemonicParsing="false" onAction="#exitActionHandler" text="Sair"/>
+                        <MenuItem mnemonicParsing="false" onAction="#newFileActionHandler" text="Novo" />
+                        <MenuItem mnemonicParsing="false" onAction="#openFileActionHandler" text="Abrir" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAsActionHandler" text="Salvar como" />
+                        <MenuItem mnemonicParsing="false" onAction="#exitActionHandler" text="Sair" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Editar">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleTextCopy" text="Copiar"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleTextPaste" text="Colar"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleTextCut" text="Recortar"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleTextCopy" text="Copiar" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleTextPaste" text="Colar" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleTextCut" text="Recortar" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Compilação">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Compilar"/>
-                        <MenuItem mnemonicParsing="false" text="Executar"/>
+                        <MenuItem mnemonicParsing="false" text="Compilar" />
+                        <MenuItem mnemonicParsing="false" text="Executar" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
-        <ToolBar prefHeight="29.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                 AnchorPane.topAnchor="28.0">
+        <ToolBar prefHeight="29.0" prefWidth="600.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="28.0">
             <items>
-                <Button fx:id="newButton" mnemonicParsing="false" onAction="#newFileActionHandler" text="Novo"/>
-                <Button fx:id="openButton" mnemonicParsing="false" onAction="#openFileActionHandler" text="Abrir"/>
-                <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveActionHandler" text="Salvar"/>
-                <Button fx:id="cutButton" mnemonicParsing="false" onAction="#handleTextCut" text="Cortar"/>
-                <Button fx:id="pasteButton" mnemonicParsing="false" onAction="#handleTextPaste" text="Colar"/>
-                <Button fx:id="copyButton" mnemonicParsing="false" onAction="#handleTextCopy" text="Copiar"/>
-                <Button fx:id="compileButton" mnemonicParsing="false" text="Compilar"/>
-                <Button fx:id="runButton" mnemonicParsing="false" text="Executar"/>
-                <Button mnemonicParsing="false" onAction="#exitActionHandler" text="Sair"/>
+                <Button fx:id="newButton" mnemonicParsing="false" onAction="#newFileActionHandler" text="Novo" />
+                <Button fx:id="openButton" mnemonicParsing="false" onAction="#openFileActionHandler" text="Abrir" />
+                <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveActionHandler" text="Salvar" />
+                <Button fx:id="cutButton" mnemonicParsing="false" onAction="#handleTextCut" text="Cortar" />
+                <Button fx:id="pasteButton" mnemonicParsing="false" onAction="#handleTextPaste" text="Colar" />
+                <Button fx:id="copyButton" mnemonicParsing="false" onAction="#handleTextCopy" text="Copiar" />
+                <Button fx:id="compileButton" mnemonicParsing="false" onAction="#compileActionHandler" text="Compilar" />
+                <Button fx:id="runButton" mnemonicParsing="false" text="Executar" />
+                <Button mnemonicParsing="false" onAction="#exitActionHandler" text="Sair" />
             </items>
         </ToolBar>
-        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0"
-                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                   AnchorPane.topAnchor="69.0">
+        <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="69.0">
             <items>
-                <AnchorPane fx:id="codeAreaAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0"
-                            prefWidth="598.0">
+                <AnchorPane fx:id="codeAreaAnchorPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="598.0">
                     <children>
-                        <CodeArea fx:id="codeArea" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                        <CodeArea fx:id="codeArea" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                     </children>
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                     <children>
-                        <TextArea fx:id="outputArea" editable="false" maxHeight="1.7976931348623157E308"
-                                  maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="154.0"
-                                  prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0"
-                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                        <TextArea fx:id="outputArea" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="154.0" prefWidth="200.0" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                     </children>
                 </AnchorPane>
             </items>

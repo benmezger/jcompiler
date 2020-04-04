@@ -1,6 +1,7 @@
 package compiler.GUI;
 
 import compiler.Main;
+import compiler.parser.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -106,6 +107,14 @@ public class Controller implements Initializable {
         Platform.exit();
     }
 
+    @FXML
+    private void compileActionHandler(ActionEvent event){
+        for (Token token: LanguageParser.getTokens(this.codeArea.getText())) {
+            this.outputArea.appendText("Token: "  + LanguageParserConstants.tokenImage[token.kind]);
+            this.outputArea.appendText(" at line " + token.beginLine + " column " + token.beginColumn + "\n");
+        }
+    }
+
     private void setTitle(String title){
         if (title == null || title == ""){
             Main.getStage().setTitle("Compilador");
@@ -161,6 +170,7 @@ public class Controller implements Initializable {
             e.printStackTrace();
         }
     }
+
 
     private void saveAsFile() {
         FileChooser chooser = new FileChooser();
