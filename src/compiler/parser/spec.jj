@@ -12,6 +12,7 @@ import javax.swing.text.html.parser.Parser;import java.util.List;
 import java.util.ArrayList;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.lang.StringBuilder;
 
 public class LanguageParser {
 
@@ -37,16 +38,10 @@ public class LanguageParser {
             }
         }
 
-        parser.program();
-
         for (Token token: tokenize(parser)){
             String name = LanguageParserConstants.tokenImage[token.kind];
             System.out.println("Line " + token.beginLine + " | Column " + token.beginColumn + " | " + token + "\n");
         }
-
-       // for(Token token = getNextToken(); token.kind != EOF; token = getNextToken()){
-       //     System.out.println(token.image);
-       // }
     }
 
     public static List<Token> tokenize(LanguageParser parser){
@@ -57,8 +52,10 @@ public class LanguageParser {
             tokens.add(token);
             token = parser.getNextToken();
         }
+
         return tokens;
     }
+
 }
 PARSER_END(LanguageParser)
 
@@ -66,7 +63,15 @@ SKIP: {
     " "
     | "\n"
     | "\t"
+    | < "#" (~["\n"])* >
+    | < "/*" > : BLOCK_COMMENT_STATE
 }
+
+<BLOCK_COMMENT_STATE> SKIP: {
+    <"/*"> : DEFAULT
+    | <~[]>
+}
+
 
 /* Keywords */
 TOKEN: {
@@ -75,23 +80,24 @@ TOKEN: {
     | <STRING: "string">
     | <TRUE: "true">
     | <UNTRUE: "untrue">
-    | <DO_THIS: "do this">
+    | <DO: "do">
+    | <THIS: "this">
     | <DESCRIPTION: "description">
     | <BODY: "body">
     | <IS: "is">
     | <AS: "as">
-    | <AS_CONSTANT: "as constant">
-    | <AS_VARIABLE: "as variable">
-    | <DESIGNATE_THIS: "designate this">
-    | <READ_THIS: "read this">
-    | <WRITE_ALL_THIS: "write all this">
-    | <WRITE_THIS: "write this">
-    | <AVALIATE_THIS: "avaliate this">
-    | <UNTRUE_RESULT: "untrue result">
-    | <TRUE_RESULT: "true result">
-    | <REPEATE_THIS: "repeat this">
-    | <DECLARATION_CONSTANT_AND_VARIABLE: "declaration constant and variable">
-    | <DECLARATION_TYPE: "declaration type">
+    | <AND: "and">
+    | <CONSTANT: "constant">
+    | <VARIABLE: "variable">
+    | <DESIGNATE: "designate">
+    | <READ: "read">
+    | <WRITE: "write">
+    | <ALL: "all">
+    | <AVALIATE: "avaliate">
+    | <RESULT: "result">
+    | <REPEATE: "repeat">
+    | <DECLARATION: "declaration">
+    | <TYPE: "type">
 }
 
 /* Operators, relations, etc*/
@@ -104,6 +110,7 @@ TOKEN: {
     | <WHOLE_DIV : "%">
     | <REST_DIV: "%%">
     | <EQUAL_TO: "==">
+    | <ASSIGN: "=">
     | <DIFF_THAN: "!=">
     | <LESS_THAN: "<<">
     | <GREATER_THAN: ">>">
@@ -111,35 +118,48 @@ TOKEN: {
     | <GREATER_THAN_OR_EQ_TO: ">>=">
     | <OPEN_BRACKET: "[">
     | <CLOSE_BRACKET: "]">
+    | <OPEN_PARENTHESIS: "(">
+    | <CLOSE_PARENTHESIS: ")">
     | <DOT: ".">
+    | <COMMA: ",">
+
 }
 
 /* Logical Operators */
 TOKEN: {
-    <AND : "&">
-    | <OR : "|">
-    | <NOT: "!">
+    <LOGICAL_AND : "&" >
+    | <LOGICAL_OR : "|">
+    | <LOGICAL_NOT: "!">
 }
 
 /* Numbers  */
 TOKEN:  {
-    < NUM : (<MINUS>)? (<DIGIT>)+ >
-    | < DOUBLE : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+) >
-    | < #DIGIT : ["0" - "9"] >
+    <NUM : (<MINUS>)? (<DIGIT>)+>
+    | <DOUBLE : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+)>
+    | <#DIGIT : ["0" - "9"]>
 }
 
 /* Identifiers */
 TOKEN: {
-    <IDENTIFIER : (<LETTER>|<DIGIT>|"_")+>
-    | <#LETTER : ["a"-"z","A"-"Z"]>
-    | <#DIGITS : (["0"-"9"])+>
+    <IDENTIFIER: (<LETTER>|<DIGIT>|"_")+>
+    | <#LETTER: ["a"-"z","A"-"Z"]>
+    | <#DIGITS: (["0"-"9"])+>
 }
 
-void program() : {} {
-    function()
+TOKEN: {
+    <STRING_CONSTANT: "\"" ( ~["\"","\\","\n","\r"]
+        | "\\" ( ["n","t","b","r","f","\\","\'","\""]
+        | ( ["\n","\r"]
+        | "\r\n")))* "\"">
 }
 
-/* Production rules */
-void function() : {} {
-    <DO_THIS> <IDENTIFIER> <OPEN_BRACKET> <CLOSE_BRACKET> <EOF>
+/* Catch all for undefined tokens */
+TOKEN : {
+    <OTHER: ~[]> |
+    <INVALID_ARITHMETIC_OP:
+        <PLUS>(<PLUS>)+
+        | <MINUS>(<MINUS>)+
+        | <MINUS>(<PLUS>)+
+        | <PLUS>(<MINUS>)+
+     >
 }

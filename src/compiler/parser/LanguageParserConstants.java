@@ -11,102 +11,120 @@ public interface LanguageParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int INTEGER = 4;
+  int INTEGER = 8;
   /** RegularExpression Id. */
-  int REAL = 5;
+  int REAL = 9;
   /** RegularExpression Id. */
-  int STRING = 6;
+  int STRING = 10;
   /** RegularExpression Id. */
-  int TRUE = 7;
+  int TRUE = 11;
   /** RegularExpression Id. */
-  int UNTRUE = 8;
+  int UNTRUE = 12;
   /** RegularExpression Id. */
-  int DO_THIS = 9;
+  int DO = 13;
   /** RegularExpression Id. */
-  int DESCRIPTION = 10;
+  int THIS = 14;
   /** RegularExpression Id. */
-  int BODY = 11;
+  int DESCRIPTION = 15;
   /** RegularExpression Id. */
-  int IS = 12;
+  int BODY = 16;
   /** RegularExpression Id. */
-  int AS = 13;
+  int IS = 17;
   /** RegularExpression Id. */
-  int AS_CONSTANT = 14;
+  int AS = 18;
   /** RegularExpression Id. */
-  int AS_VARIABLE = 15;
+  int AND = 19;
   /** RegularExpression Id. */
-  int DESIGNATE_THIS = 16;
+  int CONSTANT = 20;
   /** RegularExpression Id. */
-  int READ_THIS = 17;
+  int VARIABLE = 21;
   /** RegularExpression Id. */
-  int WRITE_ALL_THIS = 18;
+  int DESIGNATE = 22;
   /** RegularExpression Id. */
-  int WRITE_THIS = 19;
+  int READ = 23;
   /** RegularExpression Id. */
-  int AVALIATE_THIS = 20;
+  int WRITE = 24;
   /** RegularExpression Id. */
-  int UNTRUE_RESULT = 21;
+  int ALL = 25;
   /** RegularExpression Id. */
-  int TRUE_RESULT = 22;
+  int AVALIATE = 26;
   /** RegularExpression Id. */
-  int REPEATE_THIS = 23;
+  int RESULT = 27;
   /** RegularExpression Id. */
-  int DECLARATION_CONSTANT_AND_VARIABLE = 24;
+  int REPEATE = 28;
   /** RegularExpression Id. */
-  int DECLARATION_TYPE = 25;
+  int DECLARATION = 29;
   /** RegularExpression Id. */
-  int PLUS = 26;
+  int TYPE = 30;
   /** RegularExpression Id. */
-  int MINUS = 27;
+  int PLUS = 31;
   /** RegularExpression Id. */
-  int MULTIPLY = 28;
+  int MINUS = 32;
   /** RegularExpression Id. */
-  int DIV = 29;
+  int MULTIPLY = 33;
   /** RegularExpression Id. */
-  int POWER = 30;
+  int DIV = 34;
   /** RegularExpression Id. */
-  int WHOLE_DIV = 31;
+  int POWER = 35;
   /** RegularExpression Id. */
-  int REST_DIV = 32;
+  int WHOLE_DIV = 36;
   /** RegularExpression Id. */
-  int EQUAL_TO = 33;
+  int REST_DIV = 37;
   /** RegularExpression Id. */
-  int DIFF_THAN = 34;
+  int EQUAL_TO = 38;
   /** RegularExpression Id. */
-  int LESS_THAN = 35;
+  int ASSIGN = 39;
   /** RegularExpression Id. */
-  int GREATER_THAN = 36;
+  int DIFF_THAN = 40;
   /** RegularExpression Id. */
-  int LESS_THAN_OR_EQ_TO = 37;
+  int LESS_THAN = 41;
   /** RegularExpression Id. */
-  int GREATER_THAN_OR_EQ_TO = 38;
+  int GREATER_THAN = 42;
   /** RegularExpression Id. */
-  int OPEN_BRACKET = 39;
+  int LESS_THAN_OR_EQ_TO = 43;
   /** RegularExpression Id. */
-  int CLOSE_BRACKET = 40;
+  int GREATER_THAN_OR_EQ_TO = 44;
   /** RegularExpression Id. */
-  int DOT = 41;
+  int OPEN_BRACKET = 45;
   /** RegularExpression Id. */
-  int AND = 42;
+  int CLOSE_BRACKET = 46;
   /** RegularExpression Id. */
-  int OR = 43;
+  int OPEN_PARENTHESIS = 47;
   /** RegularExpression Id. */
-  int NOT = 44;
+  int CLOSE_PARENTHESIS = 48;
   /** RegularExpression Id. */
-  int NUM = 45;
+  int DOT = 49;
   /** RegularExpression Id. */
-  int DOUBLE = 46;
+  int COMMA = 50;
   /** RegularExpression Id. */
-  int DIGIT = 47;
+  int LOGICAL_AND = 51;
   /** RegularExpression Id. */
-  int IDENTIFIER = 48;
+  int LOGICAL_OR = 52;
   /** RegularExpression Id. */
-  int LETTER = 49;
+  int LOGICAL_NOT = 53;
   /** RegularExpression Id. */
-  int DIGITS = 50;
+  int NUM = 54;
+  /** RegularExpression Id. */
+  int DOUBLE = 55;
+  /** RegularExpression Id. */
+  int DIGIT = 56;
+  /** RegularExpression Id. */
+  int IDENTIFIER = 57;
+  /** RegularExpression Id. */
+  int LETTER = 58;
+  /** RegularExpression Id. */
+  int DIGITS = 59;
+  /** RegularExpression Id. */
+  int STRING_CONSTANT = 60;
+  /** RegularExpression Id. */
+  int OTHER = 61;
+  /** RegularExpression Id. */
+  int INVALID_ARITHMETIC_OP = 62;
 
   /** Lexical state. */
   int DEFAULT = 0;
+  /** Lexical state. */
+  int BLOCK_COMMENT_STATE = 1;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -114,28 +132,33 @@ public interface LanguageParserConstants {
     "\" \"",
     "\"\\n\"",
     "\"\\t\"",
+    "<token of kind 4>",
+    "\"/*\"",
+    "\"/*\"",
+    "<token of kind 7>",
     "\"integer\"",
     "\"real\"",
     "\"string\"",
     "\"true\"",
     "\"untrue\"",
-    "\"do this\"",
+    "\"do\"",
+    "\"this\"",
     "\"description\"",
     "\"body\"",
     "\"is\"",
     "\"as\"",
-    "\"as constant\"",
-    "\"as variable\"",
-    "\"designate this\"",
-    "\"read this\"",
-    "\"write all this\"",
-    "\"write this\"",
-    "\"avaliate this\"",
-    "\"untrue result\"",
-    "\"true result\"",
-    "\"repeat this\"",
-    "\"declaration constant and variable\"",
-    "\"declaration type\"",
+    "\"and\"",
+    "\"constant\"",
+    "\"variable\"",
+    "\"designate\"",
+    "\"read\"",
+    "\"write\"",
+    "\"all\"",
+    "\"avaliate\"",
+    "\"result\"",
+    "\"repeat\"",
+    "\"declaration\"",
+    "\"type\"",
     "\"+\"",
     "\"-\"",
     "\"*\"",
@@ -144,6 +167,7 @@ public interface LanguageParserConstants {
     "\"%\"",
     "\"%%\"",
     "\"==\"",
+    "\"=\"",
     "\"!=\"",
     "\"<<\"",
     "\">>\"",
@@ -151,7 +175,10 @@ public interface LanguageParserConstants {
     "\">>=\"",
     "\"[\"",
     "\"]\"",
+    "\"(\"",
+    "\")\"",
     "\".\"",
+    "\",\"",
     "\"&\"",
     "\"|\"",
     "\"!\"",
@@ -161,6 +188,9 @@ public interface LanguageParserConstants {
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGITS>",
+    "<STRING_CONSTANT>",
+    "<OTHER>",
+    "<INVALID_ARITHMETIC_OP>",
   };
 
 }

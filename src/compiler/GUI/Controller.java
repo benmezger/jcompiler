@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
@@ -25,6 +26,7 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable {
     public CodeArea codeArea;
     public TextArea outputArea;
+    public Button saveButton;
 
     private File currentFile = null;
     private boolean bufferChanged = false;
@@ -36,15 +38,61 @@ public class Controller implements Initializable {
             this.clearBuffers();
         } else {
             this.bufferChanged = true;
-            this.handleFileSave();
+
+            if (this.currentFile != null) {
+                String result = this.requestUserAuthorizationToSaveFile();
+                if (result == "Sim") {
+                    this.saveFile();
+                }
+                if (result == "cancelar") {
+                    return;
+                }
+            }
+            else {
+                this.handleFileSave();
+            }
             this.clearBuffers();
+            this.setTitle(null);
         }
-        this.setTitle(null);
+    }
+
+    private String requestUserAuthorizationToSaveFile(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Deseja salvar o arquivo?");
+        alert.setHeaderText("O arquivo no editor foi editado. Deseja salvar?");
+
+        ButtonType yesButton = new ButtonType("Sim");
+        ButtonType noButton = new ButtonType("Não");
+        ButtonType cancelButton = new ButtonType("cancelar");
+        alert.getButtonTypes().setAll(yesButton, noButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        ButtonType buttonType = result.get();
+
+        if (yesButton.equals(buttonType)) {
+            return yesButton.getText();
+        }
+        else if (noButton.equals(buttonType)) {
+            return noButton.getText();
+        }
+        else  {
+            return cancelButton.getText();
+        }
     }
 
     @FXML
     private void openFileActionHandler(ActionEvent event) {
-        this.handleFileSave();
+        if (this.currentFile != null && this.bufferChanged) {
+            String result = this.requestUserAuthorizationToSaveFile();
+            if (result == "Sim") {
+                this.saveFile();
+            }
+            if (result == "cancelar"){
+                return;
+            }
+        }
+
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Abrir arquivo..");
 
@@ -62,6 +110,7 @@ public class Controller implements Initializable {
                 e.printStackTrace();
             }
 
+            this.saveButton.setDisable(true);
             this.fileSaved = true;
             this.bufferChanged = false;
         }
@@ -100,18 +149,42 @@ public class Controller implements Initializable {
 
     @FXML
     private void exitActionHandler(ActionEvent event) {
-        String result = this.handleFileSave();
-        if (result == "cancelar"){
-            return;
+        if (this.codeArea.getLength() == 0 || !this.bufferChanged || this.fileSaved) {
+            Platform.exit();
+        }
+        else {
+            String result = this.requestUserAuthorizationToSaveFile();
+            if (result == "Sim") {
+                if (this.currentFile != null && this.bufferChanged) {
+                    this.saveFile();
+                } else {
+                    this.saveAsFile();
+                }
+            } else if (result == "cancelar") {
+                return;
+            }
         }
         Platform.exit();
     }
 
     @FXML
     private void compileActionHandler(ActionEvent event){
+        this.outputArea.clear();
+
         for (Token token: LanguageParser.getTokens(this.codeArea.getText())) {
-            this.outputArea.appendText("Token: "  + LanguageParserConstants.tokenImage[token.kind]);
-            this.outputArea.appendText(" at line " + token.beginLine + " column " + token.beginColumn + "\n");
+            if (token.kind == LanguageParserConstants.OTHER){
+                this.outputArea.appendText("Token inválido: "  + LanguageParserConstants.tokenImage[token.kind]);
+            }
+            else {
+                this.outputArea.appendText("Token: " + LanguageParserConstants.tokenImage[token.kind]);
+            }
+
+            if (token.kind != 0 && !LanguageParser.tokenImage[token.kind].equals("\"" + token.image + "\"")) {
+                this.outputArea.appendText(" \"" + token.image + "\"" + " na linha " + token.beginLine + " coluna " + token.beginColumn + "\n");
+            }
+            else {
+                this.outputArea.appendText(" na linha " + token.beginLine + " coluna " + token.beginColumn + "\n");
+            }
         }
     }
 
@@ -126,11 +199,16 @@ public class Controller implements Initializable {
 
 
     private boolean isBufferOrFileChanged() {
-        return this.fileSaved || !this.bufferChanged;
+        return !this.fileSaved || this.bufferChanged;
     }
 
     private String handleFileSave() {
-        if (this.isBufferOrFileChanged()) {
+        if (!this.isBufferOrFileChanged()) {
+            return null;
+        }
+
+        if (this.currentFile != null){
+            this.saveFile();
             return null;
         }
 
@@ -166,6 +244,8 @@ public class Controller implements Initializable {
 
         try {
             IOManager.writeFile(this.currentFile, this.codeArea.getText());
+            this.fileSaved = true;
+            this.saveButton.setDisable(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -185,10 +265,11 @@ public class Controller implements Initializable {
         if (result != null) {
             this.currentFile = result;
             this.setTitle(result.getName());
-
             try {
                 IOManager.writeFile(this.currentFile, this.codeArea.getText());
                 this.bufferChanged = false;
+                this.fileSaved = true;
+                this.saveButton.setDisable(true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -207,15 +288,20 @@ public class Controller implements Initializable {
         this.bufferChanged = false;
         this.fileSaved = false;
         this.currentFile = null;
+        this.saveButton.setDisable(true);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.codeArea.setParagraphGraphicFactory(LineNumberFactory.get(this.codeArea));
+        this.saveButton.setDisable(true);
         this.codeArea.textProperty().addListener((observableValue, oldValue, newValue) -> {
             if (oldValue != newValue) {
+                saveButton.setDisable(false);
                 bufferChanged = true;
-                fileSaved = false;
+                if (currentFile != null) {
+                    fileSaved = false;
+                }
             }
         });
     }

@@ -6,6 +6,7 @@ import javax.swing.text.html.parser.Parser;import java.util.List;
 import java.util.ArrayList;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.lang.StringBuilder;
 
 public class LanguageParser implements LanguageParserConstants {
 
@@ -31,16 +32,10 @@ public class LanguageParser implements LanguageParserConstants {
             }
         }
 
-        parser.program();
-
         for (Token token: tokenize(parser)){
             String name = LanguageParserConstants.tokenImage[token.kind];
             System.out.println("Line " + token.beginLine + " | Column " + token.beginColumn + " | " + token + "\n");
         }
-
-       // for(Token token = getNextToken(); token.kind != EOF; token = getNextToken()){
-       //     System.out.println(token.image);
-       // }
     }
 
     public static List<Token> tokenize(LanguageParser parser){
@@ -51,35 +46,9 @@ public class LanguageParser implements LanguageParserConstants {
             tokens.add(token);
             token = parser.getNextToken();
         }
-        /* add last EOF */
-        tokens.add(token);
+
         return tokens;
     }
-
-  final public void program() throws ParseException {
-    trace_call("program");
-    try {
-
-      function();
-    } finally {
-      trace_return("program");
-    }
-}
-
-/* Production rules */
-  final public void function() throws ParseException {
-    trace_call("function");
-    try {
-
-      jj_consume_token(DO_THIS);
-      jj_consume_token(IDENTIFIER);
-      jj_consume_token(OPEN_BRACKET);
-      jj_consume_token(CLOSE_BRACKET);
-      jj_consume_token(0);
-    } finally {
-      trace_return("function");
-    }
-}
 
   /** Generated Token Manager. */
   public LanguageParserTokenManager token_source;
@@ -226,7 +195,7 @@ public class LanguageParser implements LanguageParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[51];
+	 boolean[] la1tokens = new boolean[63];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
@@ -243,7 +212,7 @@ public class LanguageParser implements LanguageParserConstants {
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 51; i++) {
+	 for (int i = 0; i < 63; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;
