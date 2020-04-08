@@ -27,7 +27,7 @@
                 <Menu mnemonicParsing="false" text="Compilação">
                     <items>
                         <MenuItem mnemonicParsing="false" text="Compilar" />
-                        <MenuItem mnemonicParsing="false" text="Executar" />
+                        <MenuItem disable="true" mnemonicParsing="false" text="Executar" />
                     </items>
                 </Menu>
             </menus>

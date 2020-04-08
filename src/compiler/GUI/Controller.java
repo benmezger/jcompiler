@@ -26,10 +26,12 @@ public class Controller implements Initializable {
     public CodeArea codeArea;
     public TextArea outputArea;
     public Button saveButton;
+    public Button runButton;
 
     private File currentFile = null;
     private boolean bufferChanged = false;
     private boolean fileSaved = false;
+
 
     @FXML
     private void newFileActionHandler(ActionEvent event) {
@@ -172,8 +174,18 @@ public class Controller implements Initializable {
         boolean matched = false;
 
         for (Token token: LanguageParser.getTokens(this.codeArea.getText())) {
-            if (token.kind == LanguageParserConstants.OTHER){
-                this.outputArea.appendText("Token inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+            if (token.kind == LanguageParserConstants.OTHER || token.kind == LanguageParserConstants.INVALID_IDENTIFIER){
+                switch (token.kind){
+                    case 61:
+                        this.outputArea.appendText("Simbolo inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+                        break;
+                    case 62:
+                        this.outputArea.appendText("Identificador inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+                        break;
+                    default:
+                        this.outputArea.appendText("Token inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+                        break;
+                }
             }
             else if (token.kind == 5){
                 this.outputArea.appendText("Erro: Comentário de bloco não encerrado");
@@ -297,6 +309,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.codeArea.setParagraphGraphicFactory(LineNumberFactory.get(this.codeArea));
+        this.runButton.setDisable(true);
         this.saveButton.setDisable(true);
         this.codeArea.textProperty().addListener((observableValue, oldValue, newValue) -> {
             if (oldValue != newValue) {

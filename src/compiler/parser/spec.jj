@@ -140,7 +140,7 @@ TOKEN: {
 
 /* Identifiers */
 TOKEN: {
-    <IDENTIFIER: (<LETTER>)+((<LETTER>)*(<DIGITS>)?(<LETTER>|"_"))*(("_")|<LETTER>)*>
+    <IDENTIFIER: (<LETTER>(<DIGITS>)?(<LETTER>|("_"))*)+(("_")|<LETTER>)*>
     | <#LETTER: ["a"-"z","A"-"Z"]>
     | <#DIGITS: (["0"-"9"])>
 }
@@ -148,7 +148,7 @@ TOKEN: {
 /* Numbers  */
 TOKEN:  {
     <NUM : (<MINUS>)?(<DIGIT>)+>
-    | <DOUBLE : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+)>
+    | <NUMBER_REAL : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+)>
     | <#DIGIT : ["0" - "9"]>
 }
 

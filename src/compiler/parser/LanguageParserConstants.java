@@ -111,7 +111,7 @@ public interface LanguageParserConstants {
   /** RegularExpression Id. */
   int NUM = 57;
   /** RegularExpression Id. */
-  int DOUBLE = 58;
+  int NUMBER_REAL = 58;
   /** RegularExpression Id. */
   int DIGIT = 59;
   /** RegularExpression Id. */
@@ -186,7 +186,7 @@ public interface LanguageParserConstants {
     "<LETTER>",
     "<DIGITS>",
     "<NUM>",
-    "<DOUBLE>",
+    "<NUMBER_REAL>",
     "<DIGIT>",
     "<STRING_CONSTANT>",
     "<OTHER>",
