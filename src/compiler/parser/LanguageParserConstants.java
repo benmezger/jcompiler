@@ -51,7 +51,7 @@ public interface LanguageParserConstants {
   /** RegularExpression Id. */
   int RESULT = 27;
   /** RegularExpression Id. */
-  int REPEATE = 28;
+  int REPEAT = 28;
   /** RegularExpression Id. */
   int DECLARATION = 29;
   /** RegularExpression Id. */
@@ -103,23 +103,23 @@ public interface LanguageParserConstants {
   /** RegularExpression Id. */
   int LOGICAL_NOT = 53;
   /** RegularExpression Id. */
-  int NUM = 54;
+  int IDENTIFIER = 54;
   /** RegularExpression Id. */
-  int DOUBLE = 55;
+  int LETTER = 55;
   /** RegularExpression Id. */
-  int DIGIT = 56;
+  int DIGITS = 56;
   /** RegularExpression Id. */
-  int IDENTIFIER = 57;
+  int NUM = 57;
   /** RegularExpression Id. */
-  int LETTER = 58;
+  int DOUBLE = 58;
   /** RegularExpression Id. */
-  int DIGITS = 59;
+  int DIGIT = 59;
   /** RegularExpression Id. */
   int STRING_CONSTANT = 60;
   /** RegularExpression Id. */
   int OTHER = 61;
   /** RegularExpression Id. */
-  int INVALID_ARITHMETIC_OP = 62;
+  int INVALID_IDENTIFIER = 62;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -182,15 +182,15 @@ public interface LanguageParserConstants {
     "\"&\"",
     "\"|\"",
     "\"!\"",
-    "<NUM>",
-    "<DOUBLE>",
-    "<DIGIT>",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGITS>",
+    "<NUM>",
+    "<DOUBLE>",
+    "<DIGIT>",
     "<STRING_CONSTANT>",
     "<OTHER>",
-    "<INVALID_ARITHMETIC_OP>",
+    "<INVALID_IDENTIFIER>",
   };
 
 }

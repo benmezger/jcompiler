@@ -8,11 +8,13 @@ options {
 PARSER_BEGIN(LanguageParser)
 package compiler.parser;
 
-import javax.swing.text.html.parser.Parser;import java.util.List;
+import javax.swing.text.html.parser.Parser;
+import java.util.List;
 import java.util.ArrayList;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.lang.StringBuilder;
+
 
 public class LanguageParser {
 
@@ -53,6 +55,10 @@ public class LanguageParser {
             token = parser.getNextToken();
         }
 
+        if (!TokenHandler.isClosed()){
+            tokens.add(TokenHandler.createToken());
+        }
+
         return tokens;
     }
 
@@ -64,11 +70,11 @@ SKIP: {
     | "\n"
     | "\t"
     | < "#" (~["\n"])* >
-    | < "/*" > : BLOCK_COMMENT_STATE
+    | < "/*"> {TokenHandler.writeInvalidToOutput(image.toString(), input_stream.getEndLine(), input_stream.getBeginColumn(), jjmatchedKind);}: BLOCK_COMMENT_STATE
 }
 
 <BLOCK_COMMENT_STATE> SKIP: {
-    <"/*"> : DEFAULT
+    <"/*"> {TokenHandler.setClosed(true);}: DEFAULT
     | <~[]>
 }
 
@@ -95,7 +101,7 @@ TOKEN: {
     | <ALL: "all">
     | <AVALIATE: "avaliate">
     | <RESULT: "result">
-    | <REPEATE: "repeat">
+    | <REPEAT: "repeat">
     | <DECLARATION: "declaration">
     | <TYPE: "type">
 }
@@ -132,18 +138,18 @@ TOKEN: {
     | <LOGICAL_NOT: "!">
 }
 
-/* Numbers  */
-TOKEN:  {
-    <NUM : (<MINUS>)? (<DIGIT>)+>
-    | <DOUBLE : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+)>
-    | <#DIGIT : ["0" - "9"]>
-}
-
 /* Identifiers */
 TOKEN: {
-    <IDENTIFIER: (<LETTER>|<DIGIT>|"_")+>
+    <IDENTIFIER: (<LETTER>)+((<LETTER>)*(<DIGITS>)?(<LETTER>|"_"))*(("_")|<LETTER>)*>
     | <#LETTER: ["a"-"z","A"-"Z"]>
-    | <#DIGITS: (["0"-"9"])+>
+    | <#DIGITS: (["0"-"9"])>
+}
+
+/* Numbers  */
+TOKEN:  {
+    <NUM : (<MINUS>)?(<DIGIT>)+>
+    | <DOUBLE : ((<MINUS>)? (<DIGIT>)+ <DOT> (<DIGIT>)+)>
+    | <#DIGIT : ["0" - "9"]>
 }
 
 TOKEN: {
@@ -156,10 +162,10 @@ TOKEN: {
 /* Catch all for undefined tokens */
 TOKEN : {
     <OTHER: ~[]> |
-    <INVALID_ARITHMETIC_OP:
-        <PLUS>(<PLUS>)+
-        | <MINUS>(<MINUS>)+
-        | <MINUS>(<PLUS>)+
-        | <PLUS>(<MINUS>)+
-     >
+    <INVALID_IDENTIFIER:
+        <LETTER>(<LETTER>|<DIGITS>|("_"))*<DIGITS>(<DIGITS>)+(<LETTER>|("_"))* |
+        <LETTER>(<LETTER>|<DIGITS>|("_"))*(<DIGITS>)+ |
+        <LETTER>(<LETTER>|<DIGITS>)*(("_"))+<DIGITS>(<LETTER>|<DIGITS>|("_"))* |
+        (<DIGITS>)+(<LETTER>|<DIGITS>|("_"))* |
+        ("_")(<LETTER>|<DIGITS>|("_"))*>
 }

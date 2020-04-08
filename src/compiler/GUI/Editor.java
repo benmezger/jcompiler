@@ -1,6 +1,8 @@
 package compiler.GUI;
 
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.IndexRange;
+import javafx.scene.layout.Pane;
 import org.fxmisc.richtext.CodeArea;
 
 import javax.swing.text.BadLocationException;

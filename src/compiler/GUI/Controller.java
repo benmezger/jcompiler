@@ -1,6 +1,5 @@
 package compiler.GUI;
 
-import compiler.Main;
 import compiler.parser.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -170,13 +169,17 @@ public class Controller implements Initializable {
     @FXML
     private void compileActionHandler(ActionEvent event){
         this.outputArea.clear();
+        boolean matched = false;
 
         for (Token token: LanguageParser.getTokens(this.codeArea.getText())) {
             if (token.kind == LanguageParserConstants.OTHER){
-                this.outputArea.appendText("Token inválido: "  + LanguageParserConstants.tokenImage[token.kind]);
+                this.outputArea.appendText("Token inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+            }
+            else if (token.kind == 5){
+                this.outputArea.appendText("Erro: Comentário de bloco não encerrado");
             }
             else {
-                this.outputArea.appendText("Token: " + LanguageParserConstants.tokenImage[token.kind]);
+                this.outputArea.appendText("Token (" + token.kind + "): " + LanguageParserConstants.tokenImage[token.kind]);
             }
 
             if (token.kind != 0 && !LanguageParser.tokenImage[token.kind].equals("\"" + token.image + "\"")) {
@@ -190,10 +193,10 @@ public class Controller implements Initializable {
 
     private void setTitle(String title){
         if (title == null || title == ""){
-            Main.getStage().setTitle("Compilador");
+            CompilerApp.getStage().setTitle("Compilador");
         }
         else {
-            Main.getStage().setTitle("Compilador: " + title);
+            CompilerApp.getStage().setTitle("Compilador: " + title);
         }
     }
 
