@@ -103,23 +103,25 @@ public interface LanguageParserConstants {
   /** RegularExpression Id. */
   int LOGICAL_NOT = 53;
   /** RegularExpression Id. */
-  int IDENTIFIER = 54;
+  int LOGIC = 54;
   /** RegularExpression Id. */
-  int LETTER = 55;
+  int IDENTIFIER = 55;
   /** RegularExpression Id. */
-  int DIGITS = 56;
+  int LETTER = 56;
   /** RegularExpression Id. */
-  int NUM = 57;
+  int DIGITS = 57;
   /** RegularExpression Id. */
-  int NUMBER_REAL = 58;
+  int NUM = 58;
   /** RegularExpression Id. */
-  int DIGIT = 59;
+  int NUMBER_REAL = 59;
   /** RegularExpression Id. */
-  int STRING_CONSTANT = 60;
+  int DIGIT = 60;
   /** RegularExpression Id. */
-  int OTHER = 61;
+  int STRING_CONSTANT = 61;
   /** RegularExpression Id. */
-  int INVALID_IDENTIFIER = 62;
+  int OTHER = 62;
+  /** RegularExpression Id. */
+  int INVALID_IDENTIFIER = 63;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -182,6 +184,7 @@ public interface LanguageParserConstants {
     "\"&\"",
     "\"|\"",
     "\"!\"",
+    "\"logic\"",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGITS>",

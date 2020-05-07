@@ -128,7 +128,6 @@ TOKEN: {
     | <CLOSE_PARENTHESIS: ")">
     | <DOT: ".">
     | <COMMA: ",">
-
 }
 
 /* Logical Operators */
@@ -136,6 +135,7 @@ TOKEN: {
     <LOGICAL_AND : "&" >
     | <LOGICAL_OR : "|">
     | <LOGICAL_NOT: "!">
+    | <LOGIC: "logic">
 }
 
 /* Identifiers */
