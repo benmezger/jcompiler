@@ -188,7 +188,7 @@ public class Controller implements Initializable {
                 }
             }
             else if (token.kind == 5){
-                this.outputArea.appendText("Erro: Comentário de bloco não encerrado");
+                this.outputArea.appendText("Erro: Comentário de bloco não encerrado (" + token.kind + ")");
             }
             else {
                 this.outputArea.appendText("Token (" + token.kind + "): " + LanguageParserConstants.tokenImage[token.kind]);

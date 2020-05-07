@@ -24,7 +24,7 @@ public class CompilerApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
 
-        Parent root = FXMLLoader.load(getClass().getResource("./GUI.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("GUI.fxml"));
         primaryStage.setTitle("Compilador");
         primaryStage.setScene(new Scene(root, 800, 700));
         primaryStage.show();
