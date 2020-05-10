@@ -3,6 +3,8 @@ options {
     JAVA_UNICODE_ESCAPE = true;
     STATIC = false;
     DEBUG_PARSER = true;
+    LOOKAHEAD = 1;
+    DEBUG_LOOKAHEAD = true;
 }
 
 PARSER_BEGIN(LanguageParser)
@@ -26,7 +28,6 @@ public class LanguageParser {
 
     public static void main(String args[]) throws TokenMgrError, ParseException {
         LanguageParser parser = null;
-
         if (args.length == 0) {
             parser = new LanguageParser(System.in);
         }
@@ -40,14 +41,16 @@ public class LanguageParser {
             }
         }
 
-        for (Token token: tokenize(parser)){
-            String name = LanguageParserConstants.tokenImage[token.kind];
-            System.out.println("Line " + token.beginLine + " | Column " + token.beginColumn + " | " + token + "\n");
-        }
+        parser.main();
+
+        //for (Token token: tokenize(parser)){
+        //    String name = LanguageParserConstants.tokenImage[token.kind];
+        //    System.out.println("Line " + token.beginLine + " | Column " + token.beginColumn + " | " + token + "\n");
+        //}
     }
 
     public static List<Token> tokenize(LanguageParser parser){
-        List<Token> tokens = new ArrayList<>();
+        List<Token> tokens = new ArrayList<Token>();
 
         Token token = parser.getNextToken();
         while (token.kind != LanguageParserConstants.EOF){
@@ -104,6 +107,7 @@ TOKEN: {
     | <REPEAT: "repeat">
     | <DECLARATION: "declaration">
     | <TYPE: "type">
+    | <ENUM: "enum">
 }
 
 /* Operators, relations, etc*/
@@ -140,7 +144,7 @@ TOKEN: {
 
 /* Identifiers */
 TOKEN: {
-    <IDENTIFIER: (<LETTER>(<DIGITS>)?(<LETTER>|("_"))*)+(("_")|<LETTER>)*>
+    <IDENTIFIER: (<LETTER>(<DIGITS>)?(<LETTER>|(""))*)+(("")|<LETTER>)*>
     | <#LETTER: ["a"-"z","A"-"Z"]>
     | <#DIGITS: (["0"-"9"])>
 }
@@ -161,11 +165,187 @@ TOKEN: {
 TOKEN : {
     <OTHER: ~[]> |
     <INVALID_IDENTIFIER:
-        <LETTER>(<LETTER>|<DIGITS>|("_"))*<DIGITS>(<DIGITS>)+(<LETTER>|("_"))* |
+        <LETTER>(<LETTER>|<DIGITS>|(""))*<DIGITS>(<DIGITS>)+(<LETTER>|(""))* |
         <LETTER>(<LETTER>|<DIGITS>|("_"))*(<DIGITS>)+ |
-        <LETTER>(<LETTER>|<DIGITS>)*(("_"))+<DIGITS>(<LETTER>|<DIGITS>|("_"))* |
+        <LETTER>(<LETTER>|<DIGITS>)((""))+<DIGITS>(<LETTER>|<DIGITS>|("")) |
         (<DIGITS>)+(<LETTER>|<DIGITS>|("_"))* |
-        ("_")(<LETTER>|<DIGITS>|("_"))*>
+        ("")(<LETTER>|<DIGITS>|(""))*>
+}
+
+void enum_values(): {} {
+    constant_result() | <IDENTIFIER>
+}
+
+void inner_enum_declaration() : {} {
+    <IDENTIFIER> <IS> enum_values() inner_enum_decla_cont()
+}
+
+void inner_enum_decla_cont() : {} {
+    (<COMMA> enum_values() inner_enum_decla_cont())?
+}
+void enum_declaration() : {} {
+    <TYPE> <OPEN_BRACKET>
+        (inner_enum_declaration())+
+    <CLOSE_BRACKET>
+    (<DECLARATION> declaration_constants_and_variables())?
+}
+
+void identifiers() : {} {
+    <IDENTIFIER> index()
+}
+
+void identifiers_list() : {} {
+    identifiers() (<COMMA> identifiers())*
+}
+
+void type_declaration() : {} {
+    <INTEGER> | <REAL> | <STRING> | <LOGIC> | <ENUM>
 }
 
 
+void variable_declaration() : {} {
+    identifiers_list() <IS> type_declaration() <DOT>
+}
+
+void type_constant() : {} {
+    <INTEGER> | <REAL> | <STRING> | <LOGIC>
+}
+
+void end_constant() : {} {
+    <AS> <CONSTANT> (constant_declaration())+
+}
+
+void start_variable() : {} {
+    <VARIABLE> (variable_declaration())+ (end_constant())?
+}
+
+void constant_declaration() : {} {
+    identifiers_list() <IS> type_constant() <ASSIGN> constant_result() <DOT>
+}
+
+void end_variable() : {} {
+    <AS> <VARIABLE> (variable_declaration())+
+}
+
+void start_constant() : {} {
+    <CONSTANT> (constant_declaration())+ (end_variable())?
+}
+
+void start_declaration() : {} {
+    start_variable() | start_constant()
+}
+
+void inner_declaration() : {} {
+    <AS> start_declaration()
+}
+
+void declaration_constants_and_variables() : {} {
+    <CONSTANT> <AND> <VARIABLE> <OPEN_BRACKET> inner_declaration()
+}
+
+void constant_result() : {} {
+    <STRING_LITERAL> | <NUM> | <NUMBER_REAL>
+}
+
+void logic_result() :{} {
+    <TRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> untrue_result_cont()
+}
+
+void true_result_cont() : {} {
+    (<UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> <DOT>) | <DOT>
+}
+
+void untrue_result_cont() : {} {
+    (<TRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> <DOT>) | <DOT>
+}
+
+void declarations() : {} {
+  (<DECLARATION> (enum_declaration() | declaration_constants_and_variables()))?
+}
+
+void list_of_commands() : {} {
+    (repeat() | avaliate() | (<WRITE> (write() | write_all())) | designate() | read())+
+}
+
+void expression() : {} {
+    arithmetic_or_logic_expression() expression_cont()
+}
+
+void arithmetic_or_logic_expression() : {} {
+    second_term() lesser_priority_operators()
+}
+
+void expression_cont() : {} {
+    ((<EQUAL_TO> arithmetic_or_logic_expression()) | (<DIFF_THAN> arithmetic_or_logic_expression()) | (<LESS_THAN> arithmetic_or_logic_expression()) | (<GREATER_THAN> arithmetic_or_logic_expression())
+    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression()) | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression()))?
+}
+
+void first_term() : {} {
+    element() top_priority_operators()
+}
+
+void second_term() : {} {
+    first_term() medium_priority_operators()
+}
+
+void element() : {} {
+    (<IDENTIFIER> index())
+    | <NUM> | <NUMBER_REAL> | <STRING_LITERAL>
+    | <TRUE> | <UNTRUE> | (<OPEN_PARENTHESIS> expression() <CLOSE_PARENTHESIS>)
+    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression() <CLOSE_PARENTHESIS>)
+}
+
+void index() : {} {
+    (<OPEN_BRACKET> <NUM> <CLOSE_BRACKET>)+
+}
+
+void top_priority_operators() : {} {
+    (<POWER> element())*
+}
+
+void medium_priority_operators() : {} {
+    ((<MULTIPLY> first_term()) | (<DIV> first_term()) | (<WHOLE_DIV> first_term()) | (<REST_DIV> first_term()) | (<LOGICAL_AND> first_term()))*
+}
+
+void lesser_priority_operators() : {} {
+    ((<PLUS> second_term()) | (<MINUS> second_term()) | (<LOGICAL_OR> second_term()))*
+}
+
+void repeat() : {} {
+    <REPEAT> <THIS> expression() <OPEN_BRACKET>
+        list_of_commands()
+    <CLOSE_BRACKET> <DOT>
+}
+
+void avaliate() : {} {
+    <AVALIATE> <THIS> expression()
+        logic_result()
+}
+
+void write() : {} {
+    <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+}
+
+void write_all() : {} {
+    <ALL> <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+}
+
+void write_body() : {} {
+    (constant_result() | identifiers()) (<COMMA> constant_result() | identifiers())*
+}
+
+void designate() : {} {
+    <DESIGNATE> <THIS> identifiers_list() <AS> expression() <DOT>
+}
+
+void read() : {} {
+    <READ> <THIS> <OPEN_BRACKET> identifiers_list() <CLOSE_BRACKET> <DOT>
+}
+
+void main() : {} {
+        <DO> <THIS> <IDENTIFIER> <OPEN_BRACKET> <CLOSE_BRACKET>
+            declarations()
+            <BODY>  <OPEN_BRACKET>
+                list_of_commands()
+            <CLOSE_BRACKET>
+}
