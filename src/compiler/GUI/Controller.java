@@ -3,15 +3,16 @@ package compiler.GUI;
 import compiler.parser.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.Paragraph;
 
 import javax.swing.text.BadLocationException;
 import java.io.File;
@@ -27,6 +28,7 @@ public class Controller implements Initializable {
     public TextArea outputArea;
     public Button saveButton;
     public Button runButton;
+    public Label fileStatusText;
 
     private File currentFile = null;
     private boolean bufferChanged = false;
@@ -311,6 +313,24 @@ public class Controller implements Initializable {
         this.codeArea.setParagraphGraphicFactory(LineNumberFactory.get(this.codeArea));
         this.runButton.setDisable(true);
         this.saveButton.setDisable(true);
+
+        this.codeArea.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                int p = codeArea.getCurrentParagraph() + 1;
+                fileStatusText.setText("L: " + p + "; C: " + codeArea.getCaretColumn());
+            }
+        });
+
+        this.codeArea.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                int p = codeArea.getCurrentParagraph() + 1;
+                fileStatusText.setText("L: " + p + "; C: " + codeArea.getCaretColumn());
+            }
+        });
+
+
         this.codeArea.textProperty().addListener((observableValue, oldValue, newValue) -> {
             if (oldValue != newValue) {
                 saveButton.setDisable(false);

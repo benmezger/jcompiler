@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -49,6 +50,7 @@
                 <Button fx:id="compileButton" mnemonicParsing="false" onAction="#compileActionHandler" text="Compilar" />
                 <Button fx:id="runButton" mnemonicParsing="false" text="Executar" />
                 <Button mnemonicParsing="false" onAction="#exitActionHandler" text="Sair" />
+            <Label fx:id="fileStatusText" layoutX="522.0" layoutY="15.0" text="L:0; C:0" />
             </items>
         </ToolBar>
         <SplitPane fx:id="splitPane" dividerPositions="0.5" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="69.0">
