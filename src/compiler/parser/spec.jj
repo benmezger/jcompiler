@@ -130,6 +130,8 @@ TOKEN: {
     | <CLOSE_BRACKET: "]">
     | <OPEN_PARENTHESIS: "(">
     | <CLOSE_PARENTHESIS: ")">
+    | <OPEN_CURLY_BRACKETS: "{">
+    | <CLOSE_CURLY_BRACKETS: "}">
     | <DOT: ".">
     | <COMMA: ",">
 }
@@ -177,7 +179,7 @@ void enum_values(): {} {
 }
 
 void inner_enum_declaration() : {} {
-    <IDENTIFIER> <IS> enum_values() inner_enum_decla_cont()
+    <IDENTIFIER> <IS> enum_values() inner_enum_decla_cont() <DOT>
 }
 
 void inner_enum_decla_cont() : {} {
@@ -240,7 +242,7 @@ void inner_declaration() : {} {
 }
 
 void declaration_constants_and_variables() : {} {
-    <CONSTANT> <AND> <VARIABLE> <OPEN_BRACKET> inner_declaration()
+    <CONSTANT> <AND> <VARIABLE> <OPEN_BRACKET> inner_declaration() <CLOSE_BRACKET>
 }
 
 void constant_result() : {} {
@@ -296,7 +298,7 @@ void element() : {} {
 }
 
 void index() : {} {
-    (<OPEN_BRACKET> <NUM> <CLOSE_BRACKET>)+
+    (<OPEN_CURLY_BRACKETS> <NUM> <CLOSE_CURLY_BRACKETS>)?
 }
 
 void top_priority_operators() : {} {
@@ -348,4 +350,5 @@ void main() : {} {
             <BODY>  <OPEN_BRACKET>
                 list_of_commands()
             <CLOSE_BRACKET>
+            <DESCRIPTION> <STRING_LITERAL>
 }

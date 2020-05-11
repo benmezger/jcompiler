@@ -57,71 +57,77 @@ public interface LanguageParserConstants {
   /** RegularExpression Id. */
   int TYPE = 30;
   /** RegularExpression Id. */
-  int PLUS = 31;
+  int ENUM = 31;
   /** RegularExpression Id. */
-  int MINUS = 32;
+  int PLUS = 32;
   /** RegularExpression Id. */
-  int MULTIPLY = 33;
+  int MINUS = 33;
   /** RegularExpression Id. */
-  int DIV = 34;
+  int MULTIPLY = 34;
   /** RegularExpression Id. */
-  int POWER = 35;
+  int DIV = 35;
   /** RegularExpression Id. */
-  int WHOLE_DIV = 36;
+  int POWER = 36;
   /** RegularExpression Id. */
-  int REST_DIV = 37;
+  int WHOLE_DIV = 37;
   /** RegularExpression Id. */
-  int EQUAL_TO = 38;
+  int REST_DIV = 38;
   /** RegularExpression Id. */
-  int ASSIGN = 39;
+  int EQUAL_TO = 39;
   /** RegularExpression Id. */
-  int DIFF_THAN = 40;
+  int ASSIGN = 40;
   /** RegularExpression Id. */
-  int LESS_THAN = 41;
+  int DIFF_THAN = 41;
   /** RegularExpression Id. */
-  int GREATER_THAN = 42;
+  int LESS_THAN = 42;
   /** RegularExpression Id. */
-  int LESS_THAN_OR_EQ_TO = 43;
+  int GREATER_THAN = 43;
   /** RegularExpression Id. */
-  int GREATER_THAN_OR_EQ_TO = 44;
+  int LESS_THAN_OR_EQ_TO = 44;
   /** RegularExpression Id. */
-  int OPEN_BRACKET = 45;
+  int GREATER_THAN_OR_EQ_TO = 45;
   /** RegularExpression Id. */
-  int CLOSE_BRACKET = 46;
+  int OPEN_BRACKET = 46;
   /** RegularExpression Id. */
-  int OPEN_PARENTHESIS = 47;
+  int CLOSE_BRACKET = 47;
   /** RegularExpression Id. */
-  int CLOSE_PARENTHESIS = 48;
+  int OPEN_PARENTHESIS = 48;
   /** RegularExpression Id. */
-  int DOT = 49;
+  int CLOSE_PARENTHESIS = 49;
   /** RegularExpression Id. */
-  int COMMA = 50;
+  int OPEN_CURLY_BRACKETS = 50;
   /** RegularExpression Id. */
-  int LOGICAL_AND = 51;
+  int CLOSE_CURLY_BRACKETS = 51;
   /** RegularExpression Id. */
-  int LOGICAL_OR = 52;
+  int DOT = 52;
   /** RegularExpression Id. */
-  int LOGICAL_NOT = 53;
+  int COMMA = 53;
   /** RegularExpression Id. */
-  int LOGIC = 54;
+  int LOGICAL_AND = 54;
   /** RegularExpression Id. */
-  int IDENTIFIER = 55;
+  int LOGICAL_OR = 55;
   /** RegularExpression Id. */
-  int LETTER = 56;
+  int LOGICAL_NOT = 56;
   /** RegularExpression Id. */
-  int DIGITS = 57;
+  int LOGIC = 57;
   /** RegularExpression Id. */
-  int NUM = 58;
+  int IDENTIFIER = 58;
   /** RegularExpression Id. */
-  int NUMBER_REAL = 59;
+  int LETTER = 59;
   /** RegularExpression Id. */
-  int DIGIT = 60;
+  int DIGITS = 60;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 61;
+  int NUM = 61;
   /** RegularExpression Id. */
-  int OTHER = 62;
+  int NUMBER_REAL = 62;
   /** RegularExpression Id. */
-  int INVALID_IDENTIFIER = 63;
+  int DIGIT = 63;
+  /** RegularExpression Id. */
+  int STRING_LITERAL = 64;
+  /** RegularExpression Id. */
+  int OTHER = 65;
+  /** RegularExpression Id. */
+  int INVALID_IDENTIFIER = 66;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -161,6 +167,7 @@ public interface LanguageParserConstants {
     "\"repeat\"",
     "\"declaration\"",
     "\"type\"",
+    "\"enum\"",
     "\"+\"",
     "\"-\"",
     "\"*\"",
@@ -179,6 +186,8 @@ public interface LanguageParserConstants {
     "\"]\"",
     "\"(\"",
     "\")\"",
+    "\"{\"",
+    "\"}\"",
     "\".\"",
     "\",\"",
     "\"&\"",
