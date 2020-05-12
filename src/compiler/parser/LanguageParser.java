@@ -8,15 +8,39 @@ import java.util.ArrayList;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.lang.StringBuilder;
-
+import java.lang.StringBuilder;
 
 public class LanguageParser implements LanguageParserConstants {
+    int contParseError = 0;
+    boolean debugRecovery = true;
+    final static List<ErrorStruct> output = new ArrayList<ErrorStruct>();
+    boolean eof;
 
     public static List<Token> getTokens(String stream){
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
         return tokenize(parser);
     }
+
+    public static ArrayList<ErrorStruct> checkSyntax(String stream) {
+        InputStream target =  new ByteArrayInputStream(stream.getBytes());
+        LanguageParser parser = new LanguageParser(target);
+        try {
+            parser.begin_program();
+            }
+        catch (ParseException e){
+            output.add(new ErrorStruct("Error parsing the program.\n", e));
+        }
+        ArrayList tmp = new ArrayList<ErrorStruct>(output);
+        output.clear();
+        return tmp;
+    }
+
+   public static LanguageParser create(String stream){
+        InputStream target =  new ByteArrayInputStream(stream.getBytes());
+        LanguageParser parser = new LanguageParser(target);
+        return parser;
+   }
 
     public static void main(String args[]) throws TokenMgrError, ParseException {
         LanguageParser parser = null;
@@ -32,8 +56,6 @@ public class LanguageParser implements LanguageParserConstants {
                 return;
             }
         }
-
-        parser.main();
 
         //for (Token token: tokenize(parser)){
         //    String name = LanguageParserConstants.tokenImage[token.kind];
@@ -55,6 +77,36 @@ public class LanguageParser implements LanguageParserConstants {
         }
 
         return tokens;
+    }
+
+    static public String im(int x){
+        String s = tokenImage[x];
+        int k = s.lastIndexOf("\"");
+        try {
+            s = s.substring(1, k);
+        }
+        catch (StringIndexOutOfBoundsException e){}
+        return s;
+    }
+
+    public void consumeUntil(RecoverySet g, ParseException e, String met) throws  ParseException {
+        Token tok;
+        if (g == null){
+            throw e;
+        }
+        tok = getToken(1); // Current token
+        while (!eof){
+            /* found a token in set */
+            if (g.contains(tok.kind)) {
+                break;
+            }
+            getNextToken();
+            tok = getToken(1);
+            if (tok.kind == EOF && !g.contains(EOF)){
+                eof = true;
+            }
+        }
+        contParseError++;
     }
 
   final public void enum_values() throws ParseException {
@@ -82,15 +134,20 @@ public class LanguageParser implements LanguageParserConstants {
     }
 }
 
-  final public void inner_enum_declaration() throws ParseException {
+  final public void inner_enum_declaration(RecoverySet r) throws ParseException {
     trace_call("inner_enum_declaration");
     try {
 
-      jj_consume_token(IDENTIFIER);
-      jj_consume_token(IS);
-      enum_values();
-      inner_enum_decla_cont();
-      jj_consume_token(DOT);
+      try {
+        jj_consume_token(IDENTIFIER);
+        jj_consume_token(IS);
+        enum_values();
+        inner_enum_decla_cont();
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
+           output.add(new ErrorStruct("Erro: declaracao de enum interna incorreta.\n", e));
+      }
     } finally {
       trace_return("inner_enum_declaration");
     }
@@ -116,35 +173,40 @@ public class LanguageParser implements LanguageParserConstants {
     }
 }
 
-  final public void enum_declaration() throws ParseException {
+  final public void enum_declaration(RecoverySet r) throws ParseException {
     trace_call("enum_declaration");
     try {
 
-      jj_consume_token(TYPE);
-      jj_consume_token(OPEN_BRACKET);
-      label_1:
-      while (true) {
-        inner_enum_declaration();
+      try {
+        jj_consume_token(TYPE);
+        jj_consume_token(OPEN_BRACKET);
+        label_1:
+        while (true) {
+          inner_enum_declaration(r);
+          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+          case IDENTIFIER:{
+            ;
+            break;
+            }
+          default:
+            jj_la1[2] = jj_gen;
+            break label_1;
+          }
+        }
+        jj_consume_token(CLOSE_BRACKET);
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case IDENTIFIER:{
-          ;
+        case DECLARATION:{
+          jj_consume_token(DECLARATION);
+          declaration_constants_and_variables(r);
           break;
           }
         default:
-          jj_la1[2] = jj_gen;
-          break label_1;
+          jj_la1[3] = jj_gen;
+          ;
         }
-      }
-      jj_consume_token(CLOSE_BRACKET);
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case DECLARATION:{
-        jj_consume_token(DECLARATION);
-        declaration_constants_and_variables();
-        break;
-        }
-      default:
-        jj_la1[3] = jj_gen;
-        ;
+      } catch (ParseException e) {
+consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
+       output.add(new ErrorStruct("Erro: declaracao de enum incorreta.\n", e));
       }
     } finally {
       trace_return("enum_declaration");
@@ -392,50 +454,65 @@ public class LanguageParser implements LanguageParserConstants {
     }
 }
 
-  final public void start_declaration() throws ParseException {
+  final public void start_declaration(RecoverySet r) throws ParseException {
     trace_call("start_declaration");
     try {
 
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case VARIABLE:{
-        start_variable();
-        break;
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case VARIABLE:{
+          start_variable();
+          break;
+          }
+        case CONSTANT:{
+          start_constant();
+          break;
+          }
+        default:
+          jj_la1[13] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
         }
-      case CONSTANT:{
-        start_constant();
-        break;
-        }
-      default:
-        jj_la1[13] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      } catch (ParseException e) {
+consumeUntil(r, e, "Error: Invalid declaration body.\n");
+         output.add(new ErrorStruct("Error: Bad start declaration.\n", e));
       }
     } finally {
       trace_return("start_declaration");
     }
 }
 
-  final public void inner_declaration() throws ParseException {
+  final public void inner_declaration(RecoverySet r) throws ParseException {
     trace_call("inner_declaration");
     try {
 
-      jj_consume_token(AS);
-      start_declaration();
+      try {
+        jj_consume_token(AS);
+        start_declaration(r);
+      } catch (ParseException e) {
+consumeUntil(r, e, "Error: Invalid declaration body.\n");
+        output.add(new ErrorStruct("Error: Bad inner declaration of as.\n", e));
+      }
     } finally {
       trace_return("inner_declaration");
     }
 }
 
-  final public void declaration_constants_and_variables() throws ParseException {
+  final public void declaration_constants_and_variables(RecoverySet r) throws ParseException {
     trace_call("declaration_constants_and_variables");
     try {
 
-      jj_consume_token(CONSTANT);
-      jj_consume_token(AND);
-      jj_consume_token(VARIABLE);
-      jj_consume_token(OPEN_BRACKET);
-      inner_declaration();
-      jj_consume_token(CLOSE_BRACKET);
+      try {
+        jj_consume_token(CONSTANT);
+        jj_consume_token(AND);
+        jj_consume_token(VARIABLE);
+        jj_consume_token(OPEN_BRACKET);
+        inner_declaration(r);
+        jj_consume_token(CLOSE_BRACKET);
+      } catch (ParseException e) {
+consumeUntil(r, e, "declaration_constants_and_variables");
+        output.add(new ErrorStruct("Error: Bad inner constant and variable declaration.\n", e));
+      }
     } finally {
       trace_return("declaration_constants_and_variables");
     }
@@ -557,32 +634,37 @@ public class LanguageParser implements LanguageParserConstants {
     }
 }
 
-  final public void declarations() throws ParseException {
+  final public void declarations(RecoverySet r) throws ParseException {
     trace_call("declarations");
     try {
 
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case DECLARATION:{
-        jj_consume_token(DECLARATION);
+      try {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case TYPE:{
-          enum_declaration();
-          break;
+        case DECLARATION:{
+          jj_consume_token(DECLARATION);
+          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+          case TYPE:{
+            enum_declaration(r);
+            break;
+            }
+          case CONSTANT:{
+            declaration_constants_and_variables(r);
+            break;
+            }
+          default:
+            jj_la1[18] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
           }
-        case CONSTANT:{
-          declaration_constants_and_variables();
           break;
           }
         default:
-          jj_la1[18] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
+          jj_la1[19] = jj_gen;
+          ;
         }
-        break;
-        }
-      default:
-        jj_la1[19] = jj_gen;
-        ;
+      } catch (ParseException e) {
+consumeUntil(r, e, "declarations");
+       output.add(new ErrorStruct("Erro de declara\u00e7\u00e3o de enum/variable\n", e));
       }
     } finally {
       trace_return("declarations");
@@ -592,62 +674,66 @@ public class LanguageParser implements LanguageParserConstants {
   final public void list_of_commands() throws ParseException {
     trace_call("list_of_commands");
     try {
-
-      label_7:
-      while (true) {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case REPEAT:{
-          repeat();
-          break;
-          }
-        case AVALIATE:{
-          avaliate();
-          break;
-          }
-        case WRITE:{
-          jj_consume_token(WRITE);
+RecoverySet g = new RecoverySet(DOT);
+      try {
+        label_7:
+        while (true) {
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case THIS:{
-            write();
+          case REPEAT:{
+            repeat();
             break;
             }
-          case ALL:{
-            write_all();
+          case AVALIATE:{
+            avaliate();
+            break;
+            }
+          case WRITE:{
+            jj_consume_token(WRITE);
+            switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+            case THIS:{
+              write();
+              break;
+              }
+            case ALL:{
+              write_all();
+              break;
+              }
+            default:
+              jj_la1[20] = jj_gen;
+              jj_consume_token(-1);
+              throw new ParseException();
+            }
+            break;
+            }
+          case DESIGNATE:{
+            designate();
+            break;
+            }
+          case READ:{
+            read();
             break;
             }
           default:
-            jj_la1[20] = jj_gen;
+            jj_la1[21] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
-          break;
+          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+          case DESIGNATE:
+          case READ:
+          case WRITE:
+          case AVALIATE:
+          case REPEAT:{
+            ;
+            break;
+            }
+          default:
+            jj_la1[22] = jj_gen;
+            break label_7;
           }
-        case DESIGNATE:{
-          designate();
-          break;
-          }
-        case READ:{
-          read();
-          break;
-          }
-        default:
-          jj_la1[21] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
         }
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case DESIGNATE:
-        case READ:
-        case WRITE:
-        case AVALIATE:
-        case REPEAT:{
-          ;
-          break;
-          }
-        default:
-          jj_la1[22] = jj_gen;
-          break label_7;
-        }
+      } catch (ParseException e) {
+consumeUntil(g, e, "list_of_commands");
       }
     } finally {
       trace_return("list_of_commands");
@@ -1081,36 +1167,86 @@ public class LanguageParser implements LanguageParserConstants {
   final public void read() throws ParseException {
     trace_call("read");
     try {
-
-      jj_consume_token(READ);
-      jj_consume_token(THIS);
-      jj_consume_token(OPEN_BRACKET);
-      identifiers_list();
-      jj_consume_token(CLOSE_BRACKET);
-      jj_consume_token(DOT);
+RecoverySet g = new RecoverySet(DOT);
+      try {
+        jj_consume_token(READ);
+        jj_consume_token(THIS);
+        jj_consume_token(OPEN_BRACKET);
+        identifiers_list();
+        jj_consume_token(CLOSE_BRACKET);
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(g, e, "read");
+      }
     } finally {
       trace_return("read");
     }
 }
 
-  final public void main() throws ParseException {
-    trace_call("main");
+  final public void header(RecoverySet r) throws ParseException {
+    trace_call("header");
     try {
 
-      jj_consume_token(DO);
-      jj_consume_token(THIS);
-      jj_consume_token(IDENTIFIER);
-      jj_consume_token(OPEN_BRACKET);
-      jj_consume_token(CLOSE_BRACKET);
-      declarations();
-      jj_consume_token(BODY);
-      jj_consume_token(OPEN_BRACKET);
-      list_of_commands();
-      jj_consume_token(CLOSE_BRACKET);
-      jj_consume_token(DESCRIPTION);
-      jj_consume_token(STRING_LITERAL);
+      try {
+        jj_consume_token(DO);
+        jj_consume_token(THIS);
+        jj_consume_token(IDENTIFIER);
+        jj_consume_token(OPEN_BRACKET);
+        jj_consume_token(CLOSE_BRACKET);
+      } catch (ParseException e) {
+consumeUntil(r, e, "header");
+        output.add(new ErrorStruct("Erro: Cabecalho principal incorreto.\n", e));
+      }
+    } finally {
+      trace_return("header");
+    }
+}
+
+  final public void main(RecoverySet r) throws ParseException {
+    trace_call("main");
+    try {
+RecoverySet h = new RecoverySet(BODY);
+        RecoverySet g = new RecoverySet(DECLARATION);
+        RecoverySet i = g.union(h);
+        RecoverySet l = new RecoverySet(DESCRIPTION);
+      try {
+        header(i);
+        declarations(h);
+        jj_consume_token(BODY);
+        jj_consume_token(OPEN_BRACKET);
+        list_of_commands();
+        jj_consume_token(CLOSE_BRACKET);
+        jj_consume_token(DESCRIPTION);
+        jj_consume_token(STRING_LITERAL);
+      } catch (ParseException e) {
+consumeUntil(g, e, "main");
+      }
     } finally {
       trace_return("main");
+    }
+}
+
+  final public void begin_program() throws ParseException {
+    trace_call("begin_program");
+    try {
+RecoverySet r = new RecoverySet(EOF);
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case DO:{
+          main(r);
+          break;
+          }
+        default:
+          jj_la1[35] = jj_gen;
+          ;
+        }
+        jj_consume_token(0);
+      } catch (ParseException e) {
+consumeUntil(r, e, "begin_program");
+        output.add(new ErrorStruct("Erro: Forma geral do programa incorreto.\n", e));
+      }
+    } finally {
+      trace_return("begin_program");
     }
 }
 
@@ -1123,7 +1259,7 @@ public class LanguageParser implements LanguageParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[35];
+  final private int[] jj_la1 = new int[36];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1133,13 +1269,13 @@ public class LanguageParser implements LanguageParserConstants {
 	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x0,0x0,0x0,0x20000000,0x0,0x80000700,0x700,0x0,0x0,0x40000,0x0,0x0,0x40000,0x300000,0x0,0x1800,0x1000,0x800,0x40100000,0x20000000,0x2004000,0x15c00000,0x15c00000,0x0,0x0,0x1800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_0 = new int[] {0x0,0x0,0x0,0x20000000,0x0,0x80000700,0x700,0x0,0x0,0x40000,0x0,0x0,0x40000,0x300000,0x0,0x1800,0x1000,0x800,0x40100000,0x20000000,0x2004000,0x15c00000,0x15c00000,0x0,0x0,0x1800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x64000000,0x200000,0x4000000,0x0,0x200000,0x2000000,0x2000000,0x4000000,0x4000000,0x0,0x4000000,0x4000000,0x0,0x0,0x60000000,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x3e80,0x3e80,0x65010000,0x40000,0x10,0x40006c,0x40006c,0x800003,0x800003,0x64000000,0x4200000,0x4200000,};
+	   jj_la1_1 = new int[] {0x64000000,0x200000,0x4000000,0x0,0x200000,0x2000000,0x2000000,0x4000000,0x4000000,0x0,0x4000000,0x4000000,0x0,0x0,0x60000000,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x3e80,0x3e80,0x65010000,0x40000,0x10,0x40006c,0x40006c,0x800003,0x800003,0x64000000,0x4200000,0x4200000,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,};
 	}
 
   {
@@ -1156,7 +1292,7 @@ public class LanguageParser implements LanguageParserConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1170,7 +1306,7 @@ public class LanguageParser implements LanguageParserConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1180,7 +1316,7 @@ public class LanguageParser implements LanguageParserConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1198,7 +1334,7 @@ public class LanguageParser implements LanguageParserConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1207,7 +1343,7 @@ public class LanguageParser implements LanguageParserConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1216,7 +1352,7 @@ public class LanguageParser implements LanguageParserConstants {
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 35; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -1274,7 +1410,7 @@ public class LanguageParser implements LanguageParserConstants {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 35; i++) {
+	 for (int i = 0; i < 36; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {

@@ -12,15 +12,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.richtext.model.Paragraph;
 
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.sql.Struct;
+import java.util.*;
 
 
 public class Controller implements Initializable {
@@ -171,7 +170,49 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    private void compileActionHandler(ActionEvent event){
+    private void compileActionHandler(ActionEvent event) {
+        //checkLexical();
+        if (this.codeArea.getText().length() == 0) {
+            return;
+        }
+        checkSyntax();
+    }
+
+    private void checkSyntax(){
+        this.outputArea.clear();
+        ArrayList<ErrorStruct> output = LanguageParser.checkSyntax(this.codeArea.getText());
+        if (output.size() == 0) {
+            this.outputArea.appendText("Compilado com sucesso!");
+            return;
+        }
+        for (ErrorStruct err: output){
+            this.outputArea.appendText(err.getMsg());
+            this.outputArea.appendText("Linha: " + err.getError().currentToken.beginLine);
+            this.outputArea.appendText("; Coluna: " + err.getError().currentToken.endColumn);
+        }
+    }
+
+    private HashMap<String, String> getSyntaxErrorDetail(ParseException e){
+        HashMap<String, String> data = new HashMap<>();
+        int expected[][] = e.expectedTokenSequences;
+        String expectedMsg = "";
+        for (int i=0; i < expected.length; i++){
+            expectedMsg += " ( ";
+            for (int j=0; j < expected[i].length; j++){
+                expectedMsg += LanguageParserConstants.tokenImage[expected[i][j]] + ", ";
+            }
+            expectedMsg += ") ";
+        }
+
+        data.put("Token", LanguageParserConstants.tokenImage[e.currentToken.kind]);
+        data.put("Esperado", expectedMsg);
+        data.put("Linha", String.valueOf(e.currentToken.beginLine));
+        data.put("Coluna", String.valueOf(e.currentToken.endColumn));
+
+        return data;
+    }
+
+    private void checkLexical(){
         this.outputArea.clear();
         boolean matched = false;
 
