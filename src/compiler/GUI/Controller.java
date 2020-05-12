@@ -171,77 +171,46 @@ public class Controller implements Initializable {
 
     @FXML
     private void compileActionHandler(ActionEvent event) {
-        //checkLexical();
         if (this.codeArea.getText().length() == 0) {
             return;
         }
+        checkLexical();
         checkSyntax();
     }
 
     private void checkSyntax(){
-        this.outputArea.clear();
         ArrayList<ErrorStruct> output = LanguageParser.checkSyntax(this.codeArea.getText());
         if (output.size() == 0) {
-            this.outputArea.appendText("Compilado com sucesso!");
+            this.outputArea.appendText("Compilado com sucesso!\n");
             return;
         }
         for (ErrorStruct err: output){
             this.outputArea.appendText(err.getMsg());
+            this.outputArea.appendText("Esperado(s):" + err.expected());
             this.outputArea.appendText("Linha: " + err.getError().currentToken.beginLine);
             this.outputArea.appendText("; Coluna: " + err.getError().currentToken.endColumn);
         }
     }
 
-    private HashMap<String, String> getSyntaxErrorDetail(ParseException e){
-        HashMap<String, String> data = new HashMap<>();
-        int expected[][] = e.expectedTokenSequences;
-        String expectedMsg = "";
-        for (int i=0; i < expected.length; i++){
-            expectedMsg += " ( ";
-            for (int j=0; j < expected[i].length; j++){
-                expectedMsg += LanguageParserConstants.tokenImage[expected[i][j]] + ", ";
-            }
-            expectedMsg += ") ";
-        }
-
-        data.put("Token", LanguageParserConstants.tokenImage[e.currentToken.kind]);
-        data.put("Esperado", expectedMsg);
-        data.put("Linha", String.valueOf(e.currentToken.beginLine));
-        data.put("Coluna", String.valueOf(e.currentToken.endColumn));
-
-        return data;
-    }
-
     private void checkLexical(){
         this.outputArea.clear();
-        boolean matched = false;
 
         for (Token token: LanguageParser.getTokens(this.codeArea.getText())) {
             if (token.kind == LanguageParserConstants.OTHER || token.kind == LanguageParserConstants.INVALID_IDENTIFIER){
                 switch (token.kind){
                     case 61:
-                        this.outputArea.appendText("Simbolo inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+                        this.outputArea.appendText("Simbolo inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
                         break;
                     case 62:
-                        this.outputArea.appendText("Identificador inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+                        this.outputArea.appendText("Identificador inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
                         break;
                     default:
-                        this.outputArea.appendText("Token inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + "): ");
+                        this.outputArea.appendText("Token inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
                         break;
                 }
             }
             else if (token.kind == 5){
-                this.outputArea.appendText("Erro: Comentário de bloco não encerrado (" + token.kind + ")");
-            }
-            else {
-                this.outputArea.appendText("Token (" + token.kind + "): " + LanguageParserConstants.tokenImage[token.kind]);
-            }
-
-            if (token.kind != 0 && !LanguageParser.tokenImage[token.kind].equals("\"" + token.image + "\"")) {
-                this.outputArea.appendText(" \"" + token.image + "\"" + " na linha " + token.beginLine + " coluna " + token.beginColumn + "\n");
-            }
-            else {
-                this.outputArea.appendText(" na linha " + token.beginLine + " coluna " + token.beginColumn + "\n");
+                this.outputArea.appendText("Erro: Comentário de bloco não encerrado (" + token.kind + ")\n");
             }
         }
     }

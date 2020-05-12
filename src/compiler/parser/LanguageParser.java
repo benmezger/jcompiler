@@ -228,20 +228,24 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
     trace_call("identifiers_list");
     try {
 
-      identifiers();
-      label_2:
-      while (true) {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case COMMA:{
-          ;
-          break;
-          }
-        default:
-          jj_la1[4] = jj_gen;
-          break label_2;
-        }
-        jj_consume_token(COMMA);
+      try {
         identifiers();
+        label_2:
+        while (true) {
+          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+          case COMMA:{
+            ;
+            break;
+            }
+          default:
+            jj_la1[4] = jj_gen;
+            break label_2;
+          }
+          jj_consume_token(COMMA);
+          identifiers();
+        }
+      } catch (ParseException e) {
+output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
       }
     } finally {
       trace_return("identifiers_list");
@@ -475,7 +479,7 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
         }
       } catch (ParseException e) {
 consumeUntil(r, e, "Error: Invalid declaration body.\n");
-         output.add(new ErrorStruct("Error: Bad start declaration.\n", e));
+         output.add(new ErrorStruct("Erro: Declarac\u00e3o de variavel/constante errado.\n", e));
       }
     } finally {
       trace_return("start_declaration");
@@ -545,33 +549,38 @@ consumeUntil(r, e, "declaration_constants_and_variables");
     }
 }
 
-  final public void logic_result() throws ParseException {
+  final public void logic_result(RecoverySet r) throws ParseException {
     trace_call("logic_result");
     try {
-
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case TRUE:{
-        jj_consume_token(TRUE);
-        jj_consume_token(RESULT);
-        jj_consume_token(OPEN_BRACKET);
-        list_of_commands();
-        jj_consume_token(CLOSE_BRACKET);
-        true_result_cont();
-        break;
+RecoverySet g = new RecoverySet(CLOSE_BRACKET);
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case TRUE:{
+          jj_consume_token(TRUE);
+          jj_consume_token(RESULT);
+          jj_consume_token(OPEN_BRACKET);
+          list_of_commands(g);
+          jj_consume_token(CLOSE_BRACKET);
+          true_result_cont();
+          break;
+          }
+        case UNTRUE:{
+          jj_consume_token(UNTRUE);
+          jj_consume_token(RESULT);
+          jj_consume_token(OPEN_BRACKET);
+          list_of_commands(g);
+          jj_consume_token(CLOSE_BRACKET);
+          untrue_result_cont();
+          break;
+          }
+        default:
+          jj_la1[15] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
         }
-      case UNTRUE:{
-        jj_consume_token(UNTRUE);
-        jj_consume_token(RESULT);
-        jj_consume_token(OPEN_BRACKET);
-        list_of_commands();
-        jj_consume_token(CLOSE_BRACKET);
-        untrue_result_cont();
-        break;
-        }
-      default:
-        jj_la1[15] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      } catch (ParseException e) {
+consumeUntil(r, e, "");
+           output.add(new ErrorStruct("Erro: Verifica\u00e7\u00e3o de resultado logico incorreto.\n", e));
       }
     } finally {
       trace_return("logic_result");
@@ -581,25 +590,30 @@ consumeUntil(r, e, "declaration_constants_and_variables");
   final public void true_result_cont() throws ParseException {
     trace_call("true_result_cont");
     try {
-
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case UNTRUE:{
-        jj_consume_token(UNTRUE);
-        jj_consume_token(RESULT);
-        jj_consume_token(OPEN_BRACKET);
-        list_of_commands();
-        jj_consume_token(CLOSE_BRACKET);
-        jj_consume_token(DOT);
-        break;
+RecoverySet g = new RecoverySet(CLOSE_BRACKET);
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case UNTRUE:{
+          jj_consume_token(UNTRUE);
+          jj_consume_token(RESULT);
+          jj_consume_token(OPEN_BRACKET);
+          list_of_commands(g);
+          jj_consume_token(CLOSE_BRACKET);
+          jj_consume_token(DOT);
+          break;
+          }
+        case DOT:{
+          jj_consume_token(DOT);
+          break;
+          }
+        default:
+          jj_la1[16] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
         }
-      case DOT:{
-        jj_consume_token(DOT);
-        break;
-        }
-      default:
-        jj_la1[16] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      } catch (ParseException e) {
+consumeUntil(g, e, "list_of_commands");
+           output.add(new ErrorStruct("Erro: Clausula de teste incorreta.\n", e));
       }
     } finally {
       trace_return("true_result_cont");
@@ -609,25 +623,30 @@ consumeUntil(r, e, "declaration_constants_and_variables");
   final public void untrue_result_cont() throws ParseException {
     trace_call("untrue_result_cont");
     try {
-
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case TRUE:{
-        jj_consume_token(TRUE);
-        jj_consume_token(RESULT);
-        jj_consume_token(OPEN_BRACKET);
-        list_of_commands();
-        jj_consume_token(CLOSE_BRACKET);
-        jj_consume_token(DOT);
-        break;
+RecoverySet g = new RecoverySet(CLOSE_BRACKET);
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case TRUE:{
+          jj_consume_token(TRUE);
+          jj_consume_token(RESULT);
+          jj_consume_token(OPEN_BRACKET);
+          list_of_commands(g);
+          jj_consume_token(CLOSE_BRACKET);
+          jj_consume_token(DOT);
+          break;
+          }
+        case DOT:{
+          jj_consume_token(DOT);
+          break;
+          }
+        default:
+          jj_la1[17] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
         }
-      case DOT:{
-        jj_consume_token(DOT);
-        break;
-        }
-      default:
-        jj_la1[17] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+      } catch (ParseException e) {
+consumeUntil(g, e, "");
+        output.add(new ErrorStruct("Erro: Clausula de teste incorreta.\n", e));
       }
     } finally {
       trace_return("untrue_result_cont");
@@ -671,31 +690,31 @@ consumeUntil(r, e, "declarations");
     }
 }
 
-  final public void list_of_commands() throws ParseException {
+  final public void list_of_commands(RecoverySet r) throws ParseException {
     trace_call("list_of_commands");
     try {
-RecoverySet g = new RecoverySet(DOT);
+RecoverySet g = First.list_of_commands ;
       try {
         label_7:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case REPEAT:{
-            repeat();
+            repeat(g);
             break;
             }
           case AVALIATE:{
-            avaliate();
+            avaliate(g);
             break;
             }
           case WRITE:{
             jj_consume_token(WRITE);
             switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
             case THIS:{
-              write();
+              write(g);
               break;
               }
             case ALL:{
-              write_all();
+              write_all(g);
               break;
               }
             default:
@@ -706,11 +725,11 @@ RecoverySet g = new RecoverySet(DOT);
             break;
             }
           case DESIGNATE:{
-            designate();
+            designate(g);
             break;
             }
           case READ:{
-            read();
+            read(g);
             break;
             }
           default:
@@ -733,36 +752,42 @@ RecoverySet g = new RecoverySet(DOT);
           }
         }
       } catch (ParseException e) {
-consumeUntil(g, e, "list_of_commands");
+consumeUntil(r, e, "list_of_commands");
+        output.add(new ErrorStruct("Erro: Declara\u00e7\u00e3o de comando incorreta.\n", e));
       }
     } finally {
       trace_return("list_of_commands");
     }
 }
 
-  final public void expression() throws ParseException {
+  final public void expression(RecoverySet g) throws ParseException {
     trace_call("expression");
     try {
 
-      arithmetic_or_logic_expression();
-      expression_cont();
+      try {
+        arithmetic_or_logic_expression(g);
+        expression_cont(g);
+      } catch (ParseException e) {
+consumeUntil(g, e, "list_of_commands");
+       output.add(new ErrorStruct("Erro: Express\u00e3o incorreta.\n", e));
+      }
     } finally {
       trace_return("expression");
     }
 }
 
-  final public void arithmetic_or_logic_expression() throws ParseException {
+  final public void arithmetic_or_logic_expression(RecoverySet g) throws ParseException {
     trace_call("arithmetic_or_logic_expression");
     try {
 
-      second_term();
-      lesser_priority_operators();
+      second_term(g);
+      lesser_priority_operators(g);
     } finally {
       trace_return("arithmetic_or_logic_expression");
     }
 }
 
-  final public void expression_cont() throws ParseException {
+  final public void expression_cont(RecoverySet g) throws ParseException {
     trace_call("expression_cont");
     try {
 
@@ -776,32 +801,32 @@ consumeUntil(g, e, "list_of_commands");
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case EQUAL_TO:{
           jj_consume_token(EQUAL_TO);
-          arithmetic_or_logic_expression();
+          arithmetic_or_logic_expression(g);
           break;
           }
         case DIFF_THAN:{
           jj_consume_token(DIFF_THAN);
-          arithmetic_or_logic_expression();
+          arithmetic_or_logic_expression(g);
           break;
           }
         case LESS_THAN:{
           jj_consume_token(LESS_THAN);
-          arithmetic_or_logic_expression();
+          arithmetic_or_logic_expression(g);
           break;
           }
         case GREATER_THAN:{
           jj_consume_token(GREATER_THAN);
-          arithmetic_or_logic_expression();
+          arithmetic_or_logic_expression(g);
           break;
           }
         case LESS_THAN_OR_EQ_TO:{
           jj_consume_token(LESS_THAN_OR_EQ_TO);
-          arithmetic_or_logic_expression();
+          arithmetic_or_logic_expression(g);
           break;
           }
         case GREATER_THAN_OR_EQ_TO:{
           jj_consume_token(GREATER_THAN_OR_EQ_TO);
-          arithmetic_or_logic_expression();
+          arithmetic_or_logic_expression(g);
           break;
           }
         default:
@@ -820,29 +845,29 @@ consumeUntil(g, e, "list_of_commands");
     }
 }
 
-  final public void first_term() throws ParseException {
+  final public void first_term(RecoverySet g) throws ParseException {
     trace_call("first_term");
     try {
 
-      element();
-      top_priority_operators();
+      element(g);
+      top_priority_operators(g);
     } finally {
       trace_return("first_term");
     }
 }
 
-  final public void second_term() throws ParseException {
+  final public void second_term(RecoverySet g) throws ParseException {
     trace_call("second_term");
     try {
 
-      first_term();
-      medium_priority_operators();
+      first_term(g);
+      medium_priority_operators(g);
     } finally {
       trace_return("second_term");
     }
 }
 
-  final public void element() throws ParseException {
+  final public void element(RecoverySet g) throws ParseException {
     trace_call("element");
     try {
 
@@ -874,14 +899,14 @@ consumeUntil(g, e, "list_of_commands");
         }
       case OPEN_PARENTHESIS:{
         jj_consume_token(OPEN_PARENTHESIS);
-        expression();
+        expression(g);
         jj_consume_token(CLOSE_PARENTHESIS);
         break;
         }
       case LOGICAL_NOT:{
         jj_consume_token(LOGICAL_NOT);
         jj_consume_token(OPEN_PARENTHESIS);
-        expression();
+        expression(g);
         jj_consume_token(CLOSE_PARENTHESIS);
         break;
         }
@@ -915,7 +940,7 @@ consumeUntil(g, e, "list_of_commands");
     }
 }
 
-  final public void top_priority_operators() throws ParseException {
+  final public void top_priority_operators(RecoverySet g) throws ParseException {
     trace_call("top_priority_operators");
     try {
 
@@ -931,14 +956,14 @@ consumeUntil(g, e, "list_of_commands");
           break label_8;
         }
         jj_consume_token(POWER);
-        element();
+        element(g);
       }
     } finally {
       trace_return("top_priority_operators");
     }
 }
 
-  final public void medium_priority_operators() throws ParseException {
+  final public void medium_priority_operators(RecoverySet g) throws ParseException {
     trace_call("medium_priority_operators");
     try {
 
@@ -960,27 +985,27 @@ consumeUntil(g, e, "list_of_commands");
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case MULTIPLY:{
           jj_consume_token(MULTIPLY);
-          first_term();
+          first_term(g);
           break;
           }
         case DIV:{
           jj_consume_token(DIV);
-          first_term();
+          first_term(g);
           break;
           }
         case WHOLE_DIV:{
           jj_consume_token(WHOLE_DIV);
-          first_term();
+          first_term(g);
           break;
           }
         case REST_DIV:{
           jj_consume_token(REST_DIV);
-          first_term();
+          first_term(g);
           break;
           }
         case LOGICAL_AND:{
           jj_consume_token(LOGICAL_AND);
-          first_term();
+          first_term(g);
           break;
           }
         default:
@@ -994,7 +1019,7 @@ consumeUntil(g, e, "list_of_commands");
     }
 }
 
-  final public void lesser_priority_operators() throws ParseException {
+  final public void lesser_priority_operators(RecoverySet g) throws ParseException {
     trace_call("lesser_priority_operators");
     try {
 
@@ -1014,17 +1039,17 @@ consumeUntil(g, e, "list_of_commands");
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case PLUS:{
           jj_consume_token(PLUS);
-          second_term();
+          second_term(g);
           break;
           }
         case MINUS:{
           jj_consume_token(MINUS);
-          second_term();
+          second_term(g);
           break;
           }
         case LOGICAL_OR:{
           jj_consume_token(LOGICAL_OR);
-          second_term();
+          second_term(g);
           break;
           }
         default:
@@ -1038,59 +1063,80 @@ consumeUntil(g, e, "list_of_commands");
     }
 }
 
-  final public void repeat() throws ParseException {
+  final public void repeat(RecoverySet r) throws ParseException {
     trace_call("repeat");
     try {
-
-      jj_consume_token(REPEAT);
-      jj_consume_token(THIS);
-      expression();
-      jj_consume_token(OPEN_BRACKET);
-      list_of_commands();
-      jj_consume_token(CLOSE_BRACKET);
-      jj_consume_token(DOT);
+RecoverySet g = new RecoverySet(OPEN_BRACKET);
+        RecoverySet h = new RecoverySet(CLOSE_BRACKET);
+      try {
+        jj_consume_token(REPEAT);
+        jj_consume_token(THIS);
+        expression(g);
+        jj_consume_token(OPEN_BRACKET);
+        list_of_commands(h);
+        jj_consume_token(CLOSE_BRACKET);
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(r, e, "");
+       output.add(new ErrorStruct("Erro: Declara\u00e7\u00e3o do comando repeat incorreta. \n", e));
+      }
     } finally {
       trace_return("repeat");
     }
 }
 
-  final public void avaliate() throws ParseException {
+  final public void avaliate(RecoverySet r) throws ParseException {
     trace_call("avaliate");
     try {
-
-      jj_consume_token(AVALIATE);
-      jj_consume_token(THIS);
-      expression();
-      logic_result();
+RecoverySet g = new RecoverySet(DOT);
+      try {
+        jj_consume_token(AVALIATE);
+        jj_consume_token(THIS);
+        expression(First.selection_command);
+        logic_result(g);
+      } catch (ParseException e) {
+consumeUntil(r, e, "");
+           output.add(new ErrorStruct("Erro: Declara\u00e7\u00e3o do comando avaliate incorreta. \n", e));
+      }
     } finally {
       trace_return("avaliate");
     }
 }
 
-  final public void write() throws ParseException {
+  final public void write(RecoverySet g) throws ParseException {
     trace_call("write");
     try {
 
-      jj_consume_token(THIS);
-      jj_consume_token(OPEN_BRACKET);
-      write_body();
-      jj_consume_token(CLOSE_BRACKET);
-      jj_consume_token(DOT);
+      try {
+        jj_consume_token(THIS);
+        jj_consume_token(OPEN_BRACKET);
+        write_body();
+        jj_consume_token(CLOSE_BRACKET);
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(g, e, "list_of_commands");
+        output.add(new ErrorStruct("Erro: Comando write incorreto.\n", e));
+      }
     } finally {
       trace_return("write");
     }
 }
 
-  final public void write_all() throws ParseException {
+  final public void write_all(RecoverySet g) throws ParseException {
     trace_call("write_all");
     try {
 
-      jj_consume_token(ALL);
-      jj_consume_token(THIS);
-      jj_consume_token(OPEN_BRACKET);
-      write_body();
-      jj_consume_token(CLOSE_BRACKET);
-      jj_consume_token(DOT);
+      try {
+        jj_consume_token(ALL);
+        jj_consume_token(THIS);
+        jj_consume_token(OPEN_BRACKET);
+        write_body();
+        jj_consume_token(CLOSE_BRACKET);
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(g, e, "");
+       output.add(new ErrorStruct("Erro: no comando write all.\n", e));
+      }
     } finally {
       trace_return("write_all");
     }
@@ -1100,37 +1146,11 @@ consumeUntil(g, e, "list_of_commands");
     trace_call("write_body");
     try {
 
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case NUM:
-      case NUMBER_REAL:
-      case STRING_LITERAL:{
-        constant_result();
-        break;
-        }
-      case IDENTIFIER:{
-        identifiers();
-        break;
-        }
-      default:
-        jj_la1[32] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      label_11:
-      while (true) {
+      try {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case COMMA:
-        case IDENTIFIER:{
-          ;
-          break;
-          }
-        default:
-          jj_la1[33] = jj_gen;
-          break label_11;
-        }
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case COMMA:{
-          jj_consume_token(COMMA);
+        case NUM:
+        case NUMBER_REAL:
+        case STRING_LITERAL:{
           constant_result();
           break;
           }
@@ -1139,35 +1159,70 @@ consumeUntil(g, e, "list_of_commands");
           break;
           }
         default:
-          jj_la1[34] = jj_gen;
+          jj_la1[32] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
+        label_11:
+        while (true) {
+          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+          case COMMA:
+          case IDENTIFIER:{
+            ;
+            break;
+            }
+          default:
+            jj_la1[33] = jj_gen;
+            break label_11;
+          }
+          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+          case COMMA:{
+            jj_consume_token(COMMA);
+            constant_result();
+            break;
+            }
+          case IDENTIFIER:{
+            identifiers();
+            break;
+            }
+          default:
+            jj_la1[34] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
+          }
+        }
+      } catch (ParseException e) {
+output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
       }
     } finally {
       trace_return("write_body");
     }
 }
 
-  final public void designate() throws ParseException {
+  final public void designate(RecoverySet r) throws ParseException {
     trace_call("designate");
     try {
-
-      jj_consume_token(DESIGNATE);
-      jj_consume_token(THIS);
-      identifiers_list();
-      jj_consume_token(AS);
-      expression();
-      jj_consume_token(DOT);
+RecoverySet h = new RecoverySet(DOT);
+      try {
+        jj_consume_token(DESIGNATE);
+        jj_consume_token(THIS);
+        identifiers_list();
+        jj_consume_token(AS);
+        expression(h);
+        jj_consume_token(DOT);
+      } catch (ParseException e) {
+consumeUntil(r, e, "");
+       output.add(new ErrorStruct("Erro: Erro de atribui\u00e7\u00e3o (designate).\n", e));
+      }
     } finally {
       trace_return("designate");
     }
 }
 
-  final public void read() throws ParseException {
+  final public void read(RecoverySet r) throws ParseException {
     trace_call("read");
     try {
-RecoverySet g = new RecoverySet(DOT);
+
       try {
         jj_consume_token(READ);
         jj_consume_token(THIS);
@@ -1176,7 +1231,7 @@ RecoverySet g = new RecoverySet(DOT);
         jj_consume_token(CLOSE_BRACKET);
         jj_consume_token(DOT);
       } catch (ParseException e) {
-consumeUntil(g, e, "read");
+consumeUntil(r, e, "read");
       }
     } finally {
       trace_return("read");
@@ -1202,6 +1257,24 @@ consumeUntil(r, e, "header");
     }
 }
 
+  final public void body(RecoverySet r) throws ParseException {
+    trace_call("body");
+    try {
+RecoverySet g = new RecoverySet(OPEN_BRACKET);
+      try {
+        jj_consume_token(BODY);
+        jj_consume_token(OPEN_BRACKET);
+        list_of_commands(g);
+        jj_consume_token(CLOSE_BRACKET);
+      } catch (ParseException e) {
+consumeUntil(r, e, "body");
+        output.add(new ErrorStruct("Erro: Declarac\u00e3o do corpo incorreto.\n", e));
+      }
+    } finally {
+      trace_return("body");
+    }
+}
+
   final public void main(RecoverySet r) throws ParseException {
     trace_call("main");
     try {
@@ -1212,14 +1285,11 @@ RecoverySet h = new RecoverySet(BODY);
       try {
         header(i);
         declarations(h);
-        jj_consume_token(BODY);
-        jj_consume_token(OPEN_BRACKET);
-        list_of_commands();
-        jj_consume_token(CLOSE_BRACKET);
+        body(r.union(l));
         jj_consume_token(DESCRIPTION);
         jj_consume_token(STRING_LITERAL);
       } catch (ParseException e) {
-consumeUntil(g, e, "main");
+consumeUntil(r, e, "main");
       }
     } finally {
       trace_return("main");

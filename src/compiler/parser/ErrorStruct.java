@@ -15,4 +15,16 @@ public class ErrorStruct {
     public ParseException getError() {
         return error;
     }
+
+    public String expected(){
+        String expectedMsg = "";
+        for (int i=0; i < this.error.expectedTokenSequences.length; i++){
+            expectedMsg += " ( ";
+            for (int j=0; j < this.error.expectedTokenSequences[i].length; j++){
+                expectedMsg += LanguageParserConstants.tokenImage[this.error.expectedTokenSequences[i][j]] + ", ";
+            }
+            expectedMsg += ") ";
+        }
+        return expectedMsg;
+    }
 }

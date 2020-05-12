@@ -260,7 +260,13 @@ void identifiers() : {} {
 }
 
 void identifiers_list() : {} {
-    identifiers() (<COMMA> identifiers())*
+    try {
+        identifiers() (<COMMA> identifiers())*
+       }
+      catch (ParseException e){
+              output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
+          }
+
 }
 
 void type_declaration() : {} {
@@ -302,7 +308,7 @@ void start_declaration(RecoverySet r) : {} {
     }
      catch (ParseException e){
          consumeUntil(r, e, "Error: Invalid declaration body.\n");
-         output.add(new ErrorStruct("Error: Bad start declaration.\n", e));
+         output.add(new ErrorStruct("Erro: Declaracão de variavel/constante errado.\n", e));
      }
 }
 
@@ -330,16 +336,35 @@ void constant_result() : {} {
     <STRING_LITERAL> | <NUM> | <NUMBER_REAL>
 }
 
-void logic_result() :{} {
-    <TRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> untrue_result_cont()
+void logic_result(RecoverySet r ) : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
+    try {
+        <TRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> untrue_result_cont()
+    }
+   catch (ParseException e){
+           consumeUntil(r, e, "");
+           output.add(new ErrorStruct("Erro: Verificação de resultado logico incorreto.\n", e));
+       }
 }
 
-void true_result_cont() : {} {
-    (<UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> <DOT>) | <DOT>
+void true_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
+    try {
+        (<UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
+    }
+   catch (ParseException e){
+           consumeUntil(g, e, "list_of_commands");
+           output.add(new ErrorStruct("Erro: Clausula de teste incorreta.\n", e));
+       }
+
 }
 
-void untrue_result_cont() : {} {
-    (<TRUE> <RESULT> <OPEN_BRACKET> list_of_commands() <CLOSE_BRACKET> <DOT>) | <DOT>
+void untrue_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
+    try {
+        (<TRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
+    }
+    catch (ParseException e){
+        consumeUntil(g, e, "");
+        output.add(new ErrorStruct("Erro: Clausula de teste incorreta.\n", e));
+    }
 }
 
 void declarations(RecoverySet r) : {} {
@@ -352,92 +377,140 @@ void declarations(RecoverySet r) : {} {
   }
 }
 
-void list_of_commands() : {RecoverySet g = new RecoverySet(DOT);} {
+void list_of_commands(RecoverySet r) : {RecoverySet g = First.list_of_commands ;} {
     try {
-        (repeat() | avaliate() | (<WRITE> (write() | write_all())) | designate() | read())+
+        (repeat(g) | avaliate(g) | (<WRITE> (write(g) | write_all(g))) | designate(g) | read(g))+
     }
     catch (ParseException e){
-        consumeUntil(g, e, "list_of_commands");
+        consumeUntil(r, e, "list_of_commands");
+        output.add(new ErrorStruct("Erro: Declaração de comando incorreta.\n", e));
     }
 }
 
-void expression() : {} {
-    arithmetic_or_logic_expression() expression_cont()
+void expression(RecoverySet g) : {} {
+    try {
+        arithmetic_or_logic_expression(g) expression_cont(g)
+   }
+   catch (ParseException e){
+       consumeUntil(g, e, "list_of_commands");
+       output.add(new ErrorStruct("Erro: Expressão incorreta.\n", e));
+   }
 }
 
-void arithmetic_or_logic_expression() : {} {
-    second_term() lesser_priority_operators()
+void arithmetic_or_logic_expression(RecoverySet g) : {} {
+    second_term(g) lesser_priority_operators(g)
 }
 
-void expression_cont() : {} {
-    ((<EQUAL_TO> arithmetic_or_logic_expression()) | (<DIFF_THAN> arithmetic_or_logic_expression()) | (<LESS_THAN> arithmetic_or_logic_expression()) | (<GREATER_THAN> arithmetic_or_logic_expression())
-    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression()) | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression()))?
+void expression_cont(RecoverySet g) : {} {
+    ((<EQUAL_TO> arithmetic_or_logic_expression(g)) | (<DIFF_THAN> arithmetic_or_logic_expression(g)) | (<LESS_THAN> arithmetic_or_logic_expression(g)) | (<GREATER_THAN> arithmetic_or_logic_expression(g))
+    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)) | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)))?
 }
 
-void first_term() : {} {
-    element() top_priority_operators()
+void first_term(RecoverySet g) : {} {
+    element(g) top_priority_operators(g)
 }
 
-void second_term() : {} {
-    first_term() medium_priority_operators()
+void second_term(RecoverySet g) : {} {
+    first_term(g) medium_priority_operators(g)
 }
 
-void element() : {} {
+void element(RecoverySet g) : {} {
     (<IDENTIFIER> index())
     | <NUM> | <NUMBER_REAL> | <STRING_LITERAL>
-    | <TRUE> | <UNTRUE> | (<OPEN_PARENTHESIS> expression() <CLOSE_PARENTHESIS>)
-    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression() <CLOSE_PARENTHESIS>)
+    | <TRUE> | <UNTRUE> | (<OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
+    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
 }
 
 void index() : {} {
     (<OPEN_CURLY_BRACKETS> <NUM> <CLOSE_CURLY_BRACKETS>)?
 }
 
-void top_priority_operators() : {} {
-    (<POWER> element())*
+void top_priority_operators(RecoverySet g) : {} {
+    (<POWER> element(g))*
 }
 
-void medium_priority_operators() : {} {
-    ((<MULTIPLY> first_term()) | (<DIV> first_term()) | (<WHOLE_DIV> first_term()) | (<REST_DIV> first_term()) | (<LOGICAL_AND> first_term()))*
+void medium_priority_operators(RecoverySet g) : {} {
+    ((<MULTIPLY> first_term(g)) | (<DIV> first_term(g)) | (<WHOLE_DIV> first_term(g)) | (<REST_DIV> first_term(g)) | (<LOGICAL_AND> first_term(g)))*
 }
 
-void lesser_priority_operators() : {} {
-    ((<PLUS> second_term()) | (<MINUS> second_term()) | (<LOGICAL_OR> second_term()))*
+void lesser_priority_operators(RecoverySet g) : {} {
+    ((<PLUS> second_term(g)) | (<MINUS> second_term(g)) | (<LOGICAL_OR> second_term(g)))*
 }
 
-void repeat() : {} {
-    <REPEAT> <THIS> expression() <OPEN_BRACKET>
-        list_of_commands()
-    <CLOSE_BRACKET> <DOT>
+void repeat(RecoverySet r) : {
+        RecoverySet g = new RecoverySet(OPEN_BRACKET);
+        RecoverySet h = new RecoverySet(CLOSE_BRACKET);
+        } {
+    try {
+        <REPEAT> <THIS> expression(g) <OPEN_BRACKET>
+            list_of_commands(h)
+        <CLOSE_BRACKET> <DOT>
+    }
+    catch (ParseException e){
+       consumeUntil(r, e, "");
+       output.add(new ErrorStruct("Erro: Declaração do comando repeat incorreta. \n", e));
+    }
 }
 
-void avaliate() : {} {
-    <AVALIATE> <THIS> expression()
-        logic_result()
+void avaliate(RecoverySet r) : {RecoverySet g = new RecoverySet(DOT);} {
+    try {
+    <AVALIATE> <THIS> expression(First.selection_command)
+        logic_result(g)
+    }
+    catch (ParseException e){
+           consumeUntil(r, e, "");
+           output.add(new ErrorStruct("Erro: Declaração do comando avaliate incorreta. \n", e));
+    }
 }
 
-void write() : {} {
-    <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+void write(RecoverySet g) : {} {
+    try {
+        <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+    }
+    catch (ParseException e){
+        consumeUntil(g, e, "list_of_commands");
+        output.add(new ErrorStruct("Erro: Comando write incorreto.\n", e));
+  }
 }
 
-void write_all() : {} {
-    <ALL> <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+void write_all(RecoverySet g) : {} {
+    try {
+        <ALL> <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+    }
+   catch (ParseException e){
+       consumeUntil(g, e, "");
+       output.add(new ErrorStruct("Erro: no comando write all.\n", e));
+   }
+
 }
 
 void write_body() : {} {
-    (constant_result() | identifiers()) (<COMMA> constant_result() | identifiers())*
+    try {
+        (constant_result() | identifiers()) (<COMMA> constant_result() | identifiers())*
+    }
+   catch (ParseException e){
+       output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
+   }
+
 }
 
-void designate() : {} {
-    <DESIGNATE> <THIS> identifiers_list() <AS> expression() <DOT>
+void designate(RecoverySet r) : {RecoverySet h = new RecoverySet(DOT);} {
+    try {
+        <DESIGNATE> <THIS> identifiers_list() <AS> expression(h) <DOT>
+    }
+   catch (ParseException e){
+       consumeUntil(r, e, "");
+       output.add(new ErrorStruct("Erro: Erro de atribuição (designate).\n", e));
+   }
+
 }
 
-void read() : {RecoverySet g = new RecoverySet(DOT);} {
+void read(RecoverySet r) : {} {
     try {
         <READ> <THIS> <OPEN_BRACKET> identifiers_list() <CLOSE_BRACKET> <DOT>
     }
     catch (ParseException e){
-        consumeUntil(g, e, "read");
+        consumeUntil(r, e, "read");
     }
 }
 
@@ -452,6 +525,19 @@ void header(RecoverySet r) : {} {
     }
 }
 
+void body(RecoverySet r) : {RecoverySet g = new RecoverySet(OPEN_BRACKET);} {
+    try {
+            <BODY>  <OPEN_BRACKET>
+                list_of_commands(g)
+            <CLOSE_BRACKET>
+    }
+    catch (ParseException e){
+        consumeUntil(r, e, "body");
+        output.add(new ErrorStruct("Erro: Declaracão do corpo incorreto.\n", e));
+    }
+
+}
+
 void main(RecoverySet r) : {
         RecoverySet h = new RecoverySet(BODY);
         RecoverySet g = new RecoverySet(DECLARATION);
@@ -461,13 +547,11 @@ void main(RecoverySet r) : {
     try {
             header(i)
             declarations(h)
-            <BODY>  <OPEN_BRACKET>
-                list_of_commands()
-            <CLOSE_BRACKET>
+            body(r.union(l))
             <DESCRIPTION> <STRING_LITERAL>
     }
     catch (ParseException e){
-        consumeUntil(g, e, "main");
+        consumeUntil(r, e, "main");
     }
 }
 
