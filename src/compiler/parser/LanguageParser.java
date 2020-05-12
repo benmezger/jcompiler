@@ -515,7 +515,7 @@ consumeUntil(r, e, "Error: Invalid declaration body.\n");
         jj_consume_token(CLOSE_BRACKET);
       } catch (ParseException e) {
 consumeUntil(r, e, "declaration_constants_and_variables");
-        output.add(new ErrorStruct("Error: Bad inner constant and variable declaration.\n", e));
+        output.add(new ErrorStruct("Error: Forma geral de declarac\u00e3o de constante e variaval incorreta.\n", e));
       }
     } finally {
       trace_return("declaration_constants_and_variables");

@@ -184,6 +184,8 @@ public class Controller implements Initializable {
             this.outputArea.appendText("Compilado com sucesso!\n");
             return;
         }
+        this.outputArea.appendText("\n");
+        this.outputArea.appendText(output.size() + " Erros sintaticos encontrados :\n");
         for (ErrorStruct err: output){
             this.outputArea.appendText(err.getMsg());
             this.outputArea.appendText("Esperado(s):" + err.expected());
@@ -194,24 +196,36 @@ public class Controller implements Initializable {
 
     private void checkLexical(){
         this.outputArea.clear();
+        ArrayList<Token> tokens = (ArrayList<Token>) LanguageParser.getTokens(this.codeArea.getText());
+        int counter = 0;
 
-        for (Token token: LanguageParser.getTokens(this.codeArea.getText())) {
-            if (token.kind == LanguageParserConstants.OTHER || token.kind == LanguageParserConstants.INVALID_IDENTIFIER){
-                switch (token.kind){
-                    case 61:
-                        this.outputArea.appendText("Simbolo inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
-                        break;
-                    case 62:
-                        this.outputArea.appendText("Identificador inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
-                        break;
-                    default:
-                        this.outputArea.appendText("Token inválido, linha " + token.beginLine+  "; coluna: " + token.endColumn  + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
-                        break;
+        if (tokens.size() > 0) {
+            this.outputArea.appendText("Erro(s) lexicos encontrados: ");
+            for (Token token : tokens) {
+                if (token.kind == LanguageParserConstants.OTHER || token.kind == LanguageParserConstants.INVALID_IDENTIFIER) {
+                    counter++;
+                    switch (token.kind) {
+                        case 61:
+                            this.outputArea.appendText("\nSimbolo inválido " + token.beginLine + "; coluna: " + token.endColumn + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")");
+                            break;
+                        case 62:
+                            this.outputArea.appendText("\nIdentificador inválido, linha" + token.beginLine + "; coluna: " + token.endColumn + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")");
+                            break;
+                        default:
+                            this.outputArea.appendText("\nToken inválido, linha " + token.beginLine + "; coluna: " + token.endColumn + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")");
+                            break;
+                    }
+                } else if (token.kind == 5) {
+                    counter++;
+                    this.outputArea.appendText("\nErro lexico: Comentário de bloco não encerrado (" + token.kind + ")");
                 }
             }
-            else if (token.kind == 5){
-                this.outputArea.appendText("Erro: Comentário de bloco não encerrado (" + token.kind + ")\n");
+            if (counter == 0){
+                this.outputArea.appendText("0\n");
             }
+        }
+        else {
+            this.outputArea.appendText("\nErros(s) lexicos encontrados 0\n");
         }
     }
 

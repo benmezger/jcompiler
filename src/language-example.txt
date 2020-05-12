@@ -31,7 +31,7 @@ body [
 	read this [FF, EE] .
 	read this [BB, CC] .
 	designate this  Batata as 2 + 3 .
-	designate this LA as (202 + "stringggg"  - (true ^ 2) ** 2) .
+	designate this LA as (202 + "stringggg"  - (true ) ** 2) .
 
 	## comentando no meio do codigo $$
 	write all this [Laranja, Cenoura{2}] .
@@ -61,5 +61,4 @@ body [
 		write all this ["aipim", Cebola, Cenoura{2}, 1, 2, "pure", Bababa, 1, Cebola, BatataSuica{123}] .
 	].
 ]
-
 

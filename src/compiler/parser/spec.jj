@@ -330,7 +330,7 @@ void declaration_constants_and_variables(RecoverySet r) : {} {
     }
     catch (ParseException e){
         consumeUntil(r, e, "declaration_constants_and_variables");
-        output.add(new ErrorStruct("Error: Bad inner constant and variable declaration.\n", e));
+        output.add(new ErrorStruct("Error: Forma geral de declaracão de constante e variaval incorreta.\n", e));
     }
 }
 
