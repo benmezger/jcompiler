@@ -1152,6 +1152,63 @@ consumeUntil(g, e, "");
         case NUMBER_REAL:
         case STRING_LITERAL:{
           constant_result();
+          label_11:
+          while (true) {
+            switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+            case COMMA:{
+              ;
+              break;
+              }
+            default:
+              jj_la1[32] = jj_gen;
+              break label_11;
+            }
+            jj_consume_token(COMMA);
+            write_body_cont();
+          }
+          break;
+          }
+        case IDENTIFIER:{
+          identifiers();
+          label_12:
+          while (true) {
+            switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+            case COMMA:{
+              ;
+              break;
+              }
+            default:
+              jj_la1[33] = jj_gen;
+              break label_12;
+            }
+            jj_consume_token(COMMA);
+            write_body_cont();
+          }
+          break;
+          }
+        default:
+          jj_la1[34] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
+      } catch (ParseException e) {
+output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
+      }
+    } finally {
+      trace_return("write_body");
+    }
+}
+
+  final public void write_body_cont() throws ParseException {
+    trace_call("write_body_cont");
+    try {
+
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case NUM:
+        case NUMBER_REAL:
+        case STRING_LITERAL:{
+          constant_result();
           break;
           }
         case IDENTIFIER:{
@@ -1159,43 +1216,15 @@ consumeUntil(g, e, "");
           break;
           }
         default:
-          jj_la1[32] = jj_gen;
+          jj_la1[35] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
-        }
-        label_11:
-        while (true) {
-          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case COMMA:
-          case IDENTIFIER:{
-            ;
-            break;
-            }
-          default:
-            jj_la1[33] = jj_gen;
-            break label_11;
-          }
-          switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-          case COMMA:{
-            jj_consume_token(COMMA);
-            constant_result();
-            break;
-            }
-          case IDENTIFIER:{
-            identifiers();
-            break;
-            }
-          default:
-            jj_la1[34] = jj_gen;
-            jj_consume_token(-1);
-            throw new ParseException();
-          }
         }
       } catch (ParseException e) {
 output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
       }
     } finally {
-      trace_return("write_body");
+      trace_return("write_body_cont");
     }
 }
 
@@ -1275,6 +1304,30 @@ consumeUntil(r, e, "body");
     }
 }
 
+  final public void desc(RecoverySet r) throws ParseException {
+    trace_call("desc");
+    try {
+
+      try {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case DESCRIPTION:{
+          jj_consume_token(DESCRIPTION);
+          jj_consume_token(STRING_LITERAL);
+          break;
+          }
+        default:
+          jj_la1[36] = jj_gen;
+          ;
+        }
+      } catch (ParseException e) {
+consumeUntil(r, e, "description");
+        output.add(new ErrorStruct("Erro: Descricao do programa incorreto\n", e));
+      }
+    } finally {
+      trace_return("desc");
+    }
+}
+
   final public void main(RecoverySet r) throws ParseException {
     trace_call("main");
     try {
@@ -1286,8 +1339,7 @@ RecoverySet h = new RecoverySet(BODY);
         header(i);
         declarations(h);
         body(r.union(l));
-        jj_consume_token(DESCRIPTION);
-        jj_consume_token(STRING_LITERAL);
+        desc(r);
       } catch (ParseException e) {
 consumeUntil(r, e, "main");
       }
@@ -1307,7 +1359,7 @@ RecoverySet r = new RecoverySet(EOF);
           break;
           }
         default:
-          jj_la1[35] = jj_gen;
+          jj_la1[37] = jj_gen;
           ;
         }
         jj_consume_token(0);
@@ -1329,7 +1381,7 @@ consumeUntil(r, e, "begin_program");
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[36];
+  final private int[] jj_la1 = new int[38];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1339,13 +1391,13 @@ consumeUntil(r, e, "begin_program");
 	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x0,0x0,0x0,0x20000000,0x0,0x80000700,0x700,0x0,0x0,0x40000,0x0,0x0,0x40000,0x300000,0x0,0x1800,0x1000,0x800,0x40100000,0x20000000,0x2004000,0x15c00000,0x15c00000,0x0,0x0,0x1800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000,};
+	   jj_la1_0 = new int[] {0x0,0x0,0x0,0x20000000,0x0,0x80000700,0x700,0x0,0x0,0x40000,0x0,0x0,0x40000,0x300000,0x0,0x1800,0x1000,0x800,0x40100000,0x20000000,0x2004000,0x15c00000,0x15c00000,0x0,0x0,0x1800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x2000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x64000000,0x200000,0x4000000,0x0,0x200000,0x2000000,0x2000000,0x4000000,0x4000000,0x0,0x4000000,0x4000000,0x0,0x0,0x60000000,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x3e80,0x3e80,0x65010000,0x40000,0x10,0x40006c,0x40006c,0x800003,0x800003,0x64000000,0x4200000,0x4200000,0x0,};
+	   jj_la1_1 = new int[] {0x64000000,0x200000,0x4000000,0x0,0x200000,0x2000000,0x2000000,0x4000000,0x4000000,0x0,0x4000000,0x4000000,0x0,0x0,0x60000000,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x3e80,0x3e80,0x65010000,0x40000,0x10,0x40006c,0x40006c,0x800003,0x800003,0x200000,0x200000,0x64000000,0x64000000,0x0,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x1,0x0,0x0,};
 	}
 
   {
@@ -1362,7 +1414,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1376,7 +1428,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1386,7 +1438,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1404,7 +1456,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1413,7 +1465,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1422,7 +1474,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -1480,7 +1532,7 @@ consumeUntil(r, e, "begin_program");
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 36; i++) {
+	 for (int i = 0; i < 38; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {

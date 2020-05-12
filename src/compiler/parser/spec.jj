@@ -257,6 +257,8 @@ void enum_declaration(RecoverySet r) : {} {
 
 void identifiers() : {} {
     <IDENTIFIER> index()
+
+
 }
 
 void identifiers_list() : {} {
@@ -486,12 +488,21 @@ void write_all(RecoverySet g) : {} {
 
 void write_body() : {} {
     try {
-        (constant_result() | identifiers()) (<COMMA> constant_result() | identifiers())*
+         (constant_result()  (<COMMA> write_body_cont())* | identifiers()  (<COMMA> write_body_cont())*)
     }
    catch (ParseException e){
        output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
    }
 
+}
+
+void write_body_cont() : {} {
+    try {
+        constant_result() | identifiers()
+    }
+    catch (ParseException e){
+        output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
+    }
 }
 
 void designate(RecoverySet r) : {RecoverySet h = new RecoverySet(DOT);} {
@@ -538,6 +549,18 @@ void body(RecoverySet r) : {RecoverySet g = new RecoverySet(OPEN_BRACKET);} {
 
 }
 
+void desc(RecoverySet r) : {} {
+    try {
+        (<DESCRIPTION> <STRING_LITERAL>)?
+    }
+    catch (ParseException e){
+        consumeUntil(r, e, "description");
+        output.add(new ErrorStruct("Erro: Descricao do programa incorreto\n", e));
+    }
+}
+
+
+
 void main(RecoverySet r) : {
         RecoverySet h = new RecoverySet(BODY);
         RecoverySet g = new RecoverySet(DECLARATION);
@@ -548,7 +571,7 @@ void main(RecoverySet r) : {
             header(i)
             declarations(h)
             body(r.union(l))
-            <DESCRIPTION> <STRING_LITERAL>
+            desc(r)
     }
     catch (ParseException e){
         consumeUntil(r, e, "main");

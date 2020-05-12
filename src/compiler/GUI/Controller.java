@@ -188,7 +188,7 @@ public class Controller implements Initializable {
             this.outputArea.appendText(err.getMsg());
             this.outputArea.appendText("Esperado(s):" + err.expected());
             this.outputArea.appendText("Linha: " + err.getError().currentToken.beginLine);
-            this.outputArea.appendText("; Coluna: " + err.getError().currentToken.endColumn);
+            this.outputArea.appendText("; Coluna: " + err.getError().currentToken.endColumn + "\n");
         }
     }
 
@@ -205,7 +205,7 @@ public class Controller implements Initializable {
                         this.outputArea.appendText("Identificador inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
                         break;
                     default:
-                        this.outputArea.appendText("Token inválido "  + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
+                        this.outputArea.appendText("Token inválido, linha " + token.beginLine+  "; coluna: " + token.endColumn  + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")\n");
                         break;
                 }
             }
