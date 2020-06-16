@@ -206,7 +206,7 @@ public class Controller implements Initializable {
                     counter++;
                     switch (token.kind) {
                         case 61:
-                            this.outputArea.appendText("\nSimbolo inválido " + token.beginLine + "; coluna: " + token.endColumn + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")");
+                            this.outputArea.appendText("\nSimbolo inválido, linha " + token.beginLine + "; coluna: " + token.endColumn + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")");
                             break;
                         case 62:
                             this.outputArea.appendText("\nIdentificador inválido, linha" + token.beginLine + "; coluna: " + token.endColumn + " " + LanguageParserConstants.tokenImage[token.kind] + " (" + token.kind + ")");

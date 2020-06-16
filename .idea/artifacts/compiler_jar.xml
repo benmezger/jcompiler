@@ -16,6 +16,7 @@
       <element id="extracted-dir" path="$USER_HOME$/Downloads/javafx-sdk-11.0.2/lib/javafx.controls.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/Downloads/javafx-sdk-11.0.2/lib/javafx.graphics.jar" path-in-jar="/" />
       <element id="library" level="application" name="javafx-jmods-11.0" />
+      <element id="library" level="project" name="richtextfx-fat-0.10" />
     </root>
   </artifact>
 </component>
