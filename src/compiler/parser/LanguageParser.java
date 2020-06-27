@@ -16,6 +16,184 @@ public class LanguageParser implements LanguageParserConstants {
     final static List<ErrorStruct> output = new ArrayList<ErrorStruct>();
     boolean eof;
 
+    static List<String> listaComandos = new ArrayList<String>();
+    static List<String> listaParametros = new ArrayList<String>();
+    static LanguageRules regraDasLinguagem = new LanguageRules();
+    static VirtualMachine maquina;
+    static Instruction instrucoes;
+
+
+    public LanguageParser(String code){
+        this.checkSyntax(code);
+    }
+
+
+    final public void adicionar_regra(String regra, List<String> lista_parametros_dentro_funcao) throws ParseException {
+        System.out.println("REGRAAAAAAAAAAAA");
+        System.out.println(regra);
+        System.out.println(lista_parametros_dentro_funcao);
+        switch(regra){
+           case "#1":
+               regraDasLinguagem.regra1(lista_parametros_dentro_funcao.get(0));
+               for(Instruction instrucao: regraDasLinguagem.getPilha_de_instrucoes()){
+                   System.out.println(instrucao.getPonteiro() + " | " + instrucao.getInstrucao() + " | " + instrucao.getEndereco());
+               }
+               System.out.println("\n\n");
+               for(SymbolTable tabelaSimbolo: regraDasLinguagem.getPilha_de_simbolos()){
+                   System.out.println(tabelaSimbolo.getIdentificador() + " | " + tabelaSimbolo.getCategoria() + " | " +
+                           tabelaSimbolo.getAtributo1() + " | " + tabelaSimbolo.getAtributo2());
+               }
+              break;
+           case "#2":
+               regraDasLinguagem.regra2();
+              break;
+           case "#3":
+               regraDasLinguagem.regra3();
+              break;
+           case "#4":
+               regraDasLinguagem.regra4(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#5":
+               regraDasLinguagem.regra5();
+              break;
+           case "#6":
+               regraDasLinguagem.regra6();
+              break;
+           case "#7":
+               regraDasLinguagem.regra7();
+              break;
+           case "#8":
+               regraDasLinguagem.regra8();
+              break;
+           case "#9":
+               regraDasLinguagem.regra9();
+              break;
+           case "#10":
+               regraDasLinguagem.regra10(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#11":
+               regraDasLinguagem.regra11(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#12":
+               regraDasLinguagem.regra12();
+              break;
+           case "#13":
+               regraDasLinguagem.regra13(Integer.parseInt(lista_parametros_dentro_funcao.get(0)));
+              break;
+           case "#14":
+               regraDasLinguagem.regra14();
+              break;
+           case "#15":
+               regraDasLinguagem.regra15();
+              break;
+           case "#16":
+               regraDasLinguagem.regra16();
+              break;
+           case "#17":
+               regraDasLinguagem.regra17();
+              break;
+           case "#18":
+               regraDasLinguagem.regra18(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#19":
+               regraDasLinguagem.regra19();
+              break;
+           case "#20":
+               regraDasLinguagem.regra20(Integer.parseInt(lista_parametros_dentro_funcao.get(0)));
+              break;
+           case "#21":
+               regraDasLinguagem.regra21(Float.parseFloat(lista_parametros_dentro_funcao.get(0)));
+              break;
+           case "#22":
+               regraDasLinguagem.regra22(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#23":
+               regraDasLinguagem.regra23();
+              break;
+           case "#24":
+               regraDasLinguagem.regra24();
+              break;
+           case "#25":
+               regraDasLinguagem.regra25();
+              break;
+           case "#26":
+               regraDasLinguagem.regra26();
+              break;
+           case "#27":
+               regraDasLinguagem.regra27();
+              break;
+           case "#28":
+               regraDasLinguagem.regra28();
+              break;
+           case "#29":
+               regraDasLinguagem.regra29();
+              break;
+           case "#30":
+               regraDasLinguagem.regra30();
+              break;
+           case "#31":
+               regraDasLinguagem.regra31();
+              break;
+           case "#32":
+               regraDasLinguagem.regra32();
+              break;
+           case "#33":
+               regraDasLinguagem.regra33();
+              break;
+           case "#34":
+               regraDasLinguagem.regra34();
+              break;
+           case "#35":
+               regraDasLinguagem.regra35();
+              break;
+           case "#36":
+               regraDasLinguagem.regra36();
+              break;
+           case "#37":
+               regraDasLinguagem.regra37();
+              break;
+           case "#38":
+               regraDasLinguagem.regra38();
+              break;
+           case "#39":
+               regraDasLinguagem.regra39();
+              break;
+           case "#40":
+               regraDasLinguagem.regra40();
+              break;
+           case "#41":
+               regraDasLinguagem.regra41();
+              break;
+           case "#42":
+               regraDasLinguagem.regra42();
+              break;
+           case "#43":
+               regraDasLinguagem.regra43();
+              break;
+           case "#44":
+               regraDasLinguagem.regra44();
+              break;
+           case "#45":
+               regraDasLinguagem.regra45();
+              break;
+           case "#46":
+               regraDasLinguagem.regra46();
+              break;
+           case "#47":
+               regraDasLinguagem.regra47();
+              break;
+           case "#48":
+               regraDasLinguagem.regra48();
+              break;
+           case "#49":
+               regraDasLinguagem.regra49();
+              break;
+           default :
+              break;
+        }
+      }
+
+
     public static List<Token> getTokens(String stream){
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
@@ -1275,6 +1453,9 @@ consumeUntil(r, e, "read");
         jj_consume_token(DO);
         jj_consume_token(THIS);
         jj_consume_token(IDENTIFIER);
+          listaParametros.add(token.image);
+        adicionar_regra("#1", listaParametros);
+        listaParametros.remove(token.image);
         jj_consume_token(OPEN_BRACKET);
         jj_consume_token(CLOSE_BRACKET);
       } catch (ParseException e) {
@@ -1340,6 +1521,7 @@ RecoverySet h = new RecoverySet(BODY);
         declarations(h);
         body(r.union(l));
         desc(r);
+        adicionar_regra("#2");
       } catch (ParseException e) {
 consumeUntil(r, e, "main");
       }
@@ -1369,6 +1551,44 @@ consumeUntil(r, e, "begin_program");
       }
     } finally {
       trace_return("begin_program");
+    }
+}
+
+  final public void adicionar_regra(String regra) throws ParseException {
+    trace_call("adicionar_regra");
+    try {
+
+      try {
+        adicionar_regra(regra, null);
+      } catch (ParseException e) {
+output.add(new ErrorStruct("", null));
+      }
+    } finally {
+      trace_return("adicionar_regra");
+    }
+}
+
+  final public void adicionar_regra2(String regra, List<String> lista_parametros) throws ParseException {
+    trace_call("adicionar_regra2");
+    try {
+
+      try {
+        Empty();
+      } catch (ParseException e) {
+output.add(new ErrorStruct("", null));
+      }
+    } finally {
+      trace_return("adicionar_regra2");
+    }
+}
+
+  final public void Empty() throws ParseException {
+    trace_call("Empty");
+    try {
+
+
+    } finally {
+      trace_return("Empty");
     }
 }
 

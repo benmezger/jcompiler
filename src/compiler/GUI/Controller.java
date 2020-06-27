@@ -176,10 +176,14 @@ public class Controller implements Initializable {
         }
         checkLexical();
         checkSyntax();
+        //new PopupGUI("Virtual Machine").open();
     }
 
     private void checkSyntax(){
+        LanguageParser x = new LanguageParser(this.codeArea.getText());
         ArrayList<ErrorStruct> output = LanguageParser.checkSyntax(this.codeArea.getText());
+        System.out.println("BENJMIN");
+        System.out.println(output.size());
         if (output.size() == 0) {
             this.outputArea.appendText("Compilado com sucesso!\n");
             return;

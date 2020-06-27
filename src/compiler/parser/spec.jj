@@ -24,6 +24,182 @@ public class LanguageParser {
     final static List<ErrorStruct> output = new ArrayList<ErrorStruct>();
     boolean eof;
 
+    static List<String> listaComandos = new ArrayList<String>();
+    static List<String> listaParametros = new ArrayList<String>();
+    static LanguageRules regraDasLinguagem = new LanguageRules();
+    static VirtualMachine maquina;
+    static Instruction instrucoes;
+
+
+    public LanguageParser LanguageParser(String code){
+        this.checkSyntax(code);
+        return this;
+    }
+
+    final public void adicionar_regra(String regra, List<String> lista_parametros_dentro_funcao) throws ParseException {
+        System.out.println("HERHEHRHE");
+        switch(regra){
+           case "#1":
+               regraDasLinguagem.regra1(lista_parametros_dentro_funcao.get(0));
+               for(Instruction instrucao: regraDasLinguagem.getPilha_de_instrucoes()){
+                   System.out.println(instrucao.getPonteiro() + " | " + instrucao.getInstrucao() + " | " + instrucao.getEndereco());
+               }
+               System.out.println("\n\n");
+               for(SymbolTable tabelaSimbolo: regraDasLinguagem.getPilha_de_simbolos()){
+                   System.out.println(tabelaSimbolo.getIdentificador() + " | " + tabelaSimbolo.getCategoria() + " | " +
+                           tabelaSimbolo.getAtributo1() + " | " + tabelaSimbolo.getAtributo2());
+               }
+              break;
+           case "#2":
+               regraDasLinguagem.regra2();
+              break;
+           case "#3":
+               regraDasLinguagem.regra3();
+              break;
+           case "#4":
+               regraDasLinguagem.regra4(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#5":
+               regraDasLinguagem.regra5();
+              break;
+           case "#6":
+               regraDasLinguagem.regra6();
+              break;
+           case "#7":
+               regraDasLinguagem.regra7();
+              break;
+           case "#8":
+               regraDasLinguagem.regra8();
+              break;
+           case "#9":
+               regraDasLinguagem.regra9();
+              break;
+           case "#10":
+               regraDasLinguagem.regra10(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#11":
+               regraDasLinguagem.regra11(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#12":
+               regraDasLinguagem.regra12();
+              break;
+           case "#13":
+               regraDasLinguagem.regra13(Integer.parseInt(lista_parametros_dentro_funcao.get(0)));
+              break;
+           case "#14":
+               regraDasLinguagem.regra14();
+              break;
+           case "#15":
+               regraDasLinguagem.regra15();
+              break;
+           case "#16":
+               regraDasLinguagem.regra16();
+              break;
+           case "#17":
+               regraDasLinguagem.regra17();
+              break;
+           case "#18":
+               regraDasLinguagem.regra18(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#19":
+               regraDasLinguagem.regra19();
+              break;
+           case "#20":
+               regraDasLinguagem.regra20(Integer.parseInt(lista_parametros_dentro_funcao.get(0)));
+              break;
+           case "#21":
+               regraDasLinguagem.regra21(Float.parseFloat(lista_parametros_dentro_funcao.get(0)));
+              break;
+           case "#22":
+               regraDasLinguagem.regra22(lista_parametros_dentro_funcao.get(0));
+              break;
+           case "#23":
+               regraDasLinguagem.regra23();
+              break;
+           case "#24":
+               regraDasLinguagem.regra24();
+              break;
+           case "#25":
+               regraDasLinguagem.regra25();
+              break;
+           case "#26":
+               regraDasLinguagem.regra26();
+              break;
+           case "#27":
+               regraDasLinguagem.regra27();
+              break;
+           case "#28":
+               regraDasLinguagem.regra28();
+              break;
+           case "#29":
+               regraDasLinguagem.regra29();
+              break;
+           case "#30":
+               regraDasLinguagem.regra30();
+              break;
+           case "#31":
+               regraDasLinguagem.regra31();
+              break;
+           case "#32":
+               regraDasLinguagem.regra32();
+              break;
+           case "#33":
+               regraDasLinguagem.regra33();
+              break;
+           case "#34":
+               regraDasLinguagem.regra34();
+              break;
+           case "#35":
+               regraDasLinguagem.regra35();
+              break;
+           case "#36":
+               regraDasLinguagem.regra36();
+              break;
+           case "#37":
+               regraDasLinguagem.regra37();
+              break;
+           case "#38":
+               regraDasLinguagem.regra38();
+              break;
+           case "#39":
+               regraDasLinguagem.regra39();
+              break;
+           case "#40":
+               regraDasLinguagem.regra40();
+              break;
+           case "#41":
+               regraDasLinguagem.regra41();
+              break;
+           case "#42":
+               regraDasLinguagem.regra42();
+              break;
+           case "#43":
+               regraDasLinguagem.regra43();
+              break;
+           case "#44":
+               regraDasLinguagem.regra44();
+              break;
+           case "#45":
+               regraDasLinguagem.regra45();
+              break;
+           case "#46":
+               regraDasLinguagem.regra46();
+              break;
+           case "#47":
+               regraDasLinguagem.regra47();
+              break;
+           case "#48":
+               regraDasLinguagem.regra48();
+              break;
+           case "#49":
+               regraDasLinguagem.regra49();
+              break;
+           default :
+              break;
+        }
+      }
+
+
     public static List<Token> getTokens(String stream){
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
@@ -231,7 +407,7 @@ void enum_values(): {} {
 
 void inner_enum_declaration(RecoverySet r) : {} {
     try {
-        <IDENTIFIER> <IS> enum_values() inner_enum_decla_cont() <DOT>
+        <IDENTIFIER> adicionar_regra("#3") <IS> enum_values() inner_enum_decla_cont() <DOT>
     }
     catch (ParseException e){
            consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
@@ -240,7 +416,7 @@ void inner_enum_declaration(RecoverySet r) : {} {
 }
 
 void inner_enum_decla_cont() : {} {
-    (<COMMA> enum_values() inner_enum_decla_cont())?
+     adicionar_regra("#4") (<COMMA> enum_values() inner_enum_decla_cont())?
 }
 void enum_declaration(RecoverySet r) : {} {
     try {
@@ -256,14 +432,14 @@ void enum_declaration(RecoverySet r) : {} {
 }
 
 void identifiers() : {} {
-    <IDENTIFIER> index()
+    <IDENTIFIER> adicionar_regra("#24") index() adicionar_regra("#25")
 
 
 }
 
 void identifiers_list() : {} {
     try {
-        identifiers() (<COMMA> identifiers())*
+        identifiers() adicionar_regra("#23") (<COMMA> identifiers())*
        }
       catch (ParseException e){
               output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
@@ -272,12 +448,12 @@ void identifiers_list() : {} {
 }
 
 void type_declaration() : {} {
-    <INTEGER> | <REAL> | <STRING> | <LOGIC> | <ENUM>
+    <INTEGER> adicionar_regra("#13") | <REAL> adicionar_regra("#14") | <STRING> adicionar_regra("#15") | <LOGIC> adicionar_regra("#16") | <ENUM> adicionar_regra("#17")
 }
 
 
 void variable_declaration() : {} {
-    identifiers_list() <IS> type_declaration() <DOT>
+     adicionar_regra("#8") identifiers_list() <IS> type_declaration() <DOT>
 }
 
 void type_constant() : {} {
@@ -293,7 +469,7 @@ void start_variable() : {} {
 }
 
 void constant_declaration() : {} {
-    identifiers_list() <IS> type_constant() <ASSIGN> constant_result() <DOT>
+     adicionar_regra("#5") identifiers_list() <IS> type_constant()  adicionar_regra("#6") <ASSIGN> constant_result() adicionar_regra("#7") <DOT>
 }
 
 void end_variable() : {} {
@@ -316,7 +492,7 @@ void start_declaration(RecoverySet r) : {} {
 
 void inner_declaration(RecoverySet r) : {} {
     try {
-        <AS> start_declaration(r)
+        <AS> adicionar_regra("#5") start_declaration(r)
         }
     catch (ParseException e){
         consumeUntil(r, e, "Error: Invalid declaration body.\n");
@@ -340,7 +516,7 @@ void constant_result() : {} {
 
 void logic_result(RecoverySet r ) : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
     try {
-        <TRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> untrue_result_cont()
+        <TRUE> <RESULT> adicionar_regra("#32") <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> adicionar_regra("#32") <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> untrue_result_cont()
     }
    catch (ParseException e){
            consumeUntil(r, e, "");
@@ -350,7 +526,7 @@ void logic_result(RecoverySet r ) : {RecoverySet g = new RecoverySet(CLOSE_BRACK
 
 void true_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
     try {
-        (<UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
+        (<UNTRUE> <RESULT> adicionar_regra("#31") <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
     }
    catch (ParseException e){
            consumeUntil(g, e, "list_of_commands");
@@ -361,7 +537,7 @@ void true_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
 
 void untrue_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
     try {
-        (<TRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
+        (<TRUE> <RESULT> adicionar_regra("#30") <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
     }
     catch (ParseException e){
         consumeUntil(g, e, "");
@@ -404,8 +580,8 @@ void arithmetic_or_logic_expression(RecoverySet g) : {} {
 }
 
 void expression_cont(RecoverySet g) : {} {
-    ((<EQUAL_TO> arithmetic_or_logic_expression(g)) | (<DIFF_THAN> arithmetic_or_logic_expression(g)) | (<LESS_THAN> arithmetic_or_logic_expression(g)) | (<GREATER_THAN> arithmetic_or_logic_expression(g))
-    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)) | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)))?
+    ((<EQUAL_TO> arithmetic_or_logic_expression(g)) adicionar_regra("#36") | (<DIFF_THAN> arithmetic_or_logic_expression(g)) adicionar_regra("#37") | (<LESS_THAN> arithmetic_or_logic_expression(g)) adicionar_regra("#38") | (<GREATER_THAN> arithmetic_or_logic_expression(g)) adicionar_regra("#39")
+    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)) adicionar_regra("#40") | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)) adicionar_regra("#41"))?
 }
 
 void first_term(RecoverySet g) : {} {
@@ -418,25 +594,25 @@ void second_term(RecoverySet g) : {} {
 
 void element(RecoverySet g) : {} {
     (<IDENTIFIER> index())
-    | <NUM> | <NUMBER_REAL> | <STRING_LITERAL>
-    | <TRUE> | <UNTRUE> | (<OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
-    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
+    | <NUM> adicionar_regra("#26") | <NUMBER_REAL> adicionar_regra("#27") | <STRING_LITERAL> adicionar_regra("#28")
+    | <TRUE> adicionar_regra("#52")| <UNTRUE> adicionar_regra("#53")| (<OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
+    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS> adicionar_regra("#54"))
 }
 
 void index() : {} {
-    (<OPEN_CURLY_BRACKETS> <NUM> <CLOSE_CURLY_BRACKETS>)?
+    (<OPEN_CURLY_BRACKETS> <NUM> adicionar_regra("#17") <CLOSE_CURLY_BRACKETS>)?
 }
 
 void top_priority_operators(RecoverySet g) : {} {
-    (<POWER> element(g))*
+    (<POWER> element(g) adicionar_regra("#50"))*
 }
 
 void medium_priority_operators(RecoverySet g) : {} {
-    ((<MULTIPLY> first_term(g)) | (<DIV> first_term(g)) | (<WHOLE_DIV> first_term(g)) | (<REST_DIV> first_term(g)) | (<LOGICAL_AND> first_term(g)))*
+    ((<MULTIPLY> first_term(g)) adicionar_regra("#45") | (<DIV> first_term(g)) adicionar_regra("#46") | (<WHOLE_DIV> first_term(g)) adicionar_regra("#47") | (<REST_DIV> first_term(g)) adicionar_regra("#48") | (<LOGICAL_AND> first_term(g)) adicionar_regra("#49"))*
 }
 
 void lesser_priority_operators(RecoverySet g) : {} {
-    ((<PLUS> second_term(g)) | (<MINUS> second_term(g)) | (<LOGICAL_OR> second_term(g)))*
+    ((<PLUS> second_term(g)) adicionar_regra("#42")| (<MINUS> second_term(g)) adicionar_regra("#43") | (<LOGICAL_OR> second_term(g)) adicionar_regra("#44"))*
 }
 
 void repeat(RecoverySet r) : {
@@ -444,9 +620,9 @@ void repeat(RecoverySet r) : {
         RecoverySet h = new RecoverySet(CLOSE_BRACKET);
         } {
     try {
-        <REPEAT> <THIS> expression(g) <OPEN_BRACKET>
+        <REPEAT> <THIS> adicionar_regra("#33") expression(g) adicionar_regra("#34") <OPEN_BRACKET>
             list_of_commands(h)
-        <CLOSE_BRACKET> <DOT>
+        <CLOSE_BRACKET> adicionar_regra("#35") <DOT>
     }
     catch (ParseException e){
        consumeUntil(r, e, "");
@@ -507,7 +683,7 @@ void write_body_cont() : {} {
 
 void designate(RecoverySet r) : {RecoverySet h = new RecoverySet(DOT);} {
     try {
-        <DESIGNATE> <THIS> identifiers_list() <AS> expression(h) <DOT>
+        <DESIGNATE> <THIS> adicionar_regra("#18") identifiers_list() <AS> expression(h) adicionar_regra("#19") <DOT>
     }
    catch (ParseException e){
        consumeUntil(r, e, "");
@@ -518,7 +694,7 @@ void designate(RecoverySet r) : {RecoverySet h = new RecoverySet(DOT);} {
 
 void read(RecoverySet r) : {} {
     try {
-        <READ> <THIS> <OPEN_BRACKET> identifiers_list() <CLOSE_BRACKET> <DOT>
+        <READ> <THIS> adicionar_regra("#20") <OPEN_BRACKET> identifiers_list() <CLOSE_BRACKET> <DOT>
     }
     catch (ParseException e){
         consumeUntil(r, e, "read");
@@ -528,7 +704,7 @@ void read(RecoverySet r) : {} {
 
 void header(RecoverySet r) : {} {
     try {
-        <DO> <THIS> <IDENTIFIER> <OPEN_BRACKET> <CLOSE_BRACKET>
+        <DO> <THIS> <IDENTIFIER> adicionar_regra("#1") <OPEN_BRACKET> <CLOSE_BRACKET>
     }
     catch (ParseException e){
         consumeUntil(r, e, "header");
@@ -571,7 +747,7 @@ void main(RecoverySet r) : {
             header(i)
             declarations(h)
             body(r.union(l))
-            desc(r)
+            desc(r) adicionar_regra("#2")
     }
     catch (ParseException e){
         consumeUntil(r, e, "main");
@@ -586,4 +762,25 @@ void begin_program() : {RecoverySet r = new RecoverySet(EOF);} {
         consumeUntil(r, e, "begin_program");
         output.add(new ErrorStruct("Erro: Forma geral do programa incorreto.\n", e));
     }
+}
+
+void adicionar_regra(String regra) : {} {
+try {
+	adicionar_regra2(regra, null)
+    } catch (ParseException e) {
+        output.add(new ErrorStruct("", null));
+    }
+}
+
+void adicionar_regra2(String regra, List<String> lista_parametros) : {} {
+try {
+	Empty()
+    } catch (ParseException e) {
+        output.add(new ErrorStruct("", null));
+    }
+}
+
+void Empty():{}
+{
+    {}
 }
