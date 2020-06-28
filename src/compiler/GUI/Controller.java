@@ -13,6 +13,7 @@ import javafx.stage.FileChooser;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 
+import javax.print.attribute.standard.PrinterMessageFromOperator;
 import javax.swing.text.BadLocationException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -176,6 +177,33 @@ public class Controller implements Initializable {
         }
         checkLexical();
         checkSyntax();
+        checkSemantic();
+    }
+
+    private void checkSemantic(){
+        SemanticAnalyzer semantic = LanguageParser.checkSemantic(this.codeArea.getText());
+        this.outputArea.appendText("\n");
+        if (semantic.getNumeroDeErros() > 0) {
+            this.outputArea.appendText(semantic.getNumeroDeErros() + " Erros semanticos encontrados :\n");
+            this.outputArea.appendText(semantic.getListaDeErrosAsString());
+            System.out.println(semantic.getListaDeErrosAsString());
+        }
+        else {
+            showInstructionPopup(semantic.getInstructions());
+        }
+    }
+
+    private void showInstructionPopup(List<Instruction> instructions){
+        PopupController popup = new PopupController();
+        popup.write("Instruções\n");
+        popup.write("Ponteiro\tCodigo\tParametro\n");
+
+        for (int i = 0; i < instructions.size(); i++){
+            Instruction inst = instructions.get(i);
+            String msg = String.valueOf(inst.getPointer()) + "\t\t" + inst.getCode() + "\t" + inst.getParameter().toString() + "\n";
+            popup.write(msg);
+        }
+        popup.popup();
     }
 
     private void checkSyntax(){

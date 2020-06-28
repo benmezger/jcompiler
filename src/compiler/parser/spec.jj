@@ -23,14 +23,19 @@ public class LanguageParser {
     boolean debugRecovery = true;
     final static List<ErrorStruct> output = new ArrayList<ErrorStruct>();
     boolean eof;
+    public static SemanticAnalyzer semantic;
 
     public static List<Token> getTokens(String stream){
+        semantic = new SemanticAnalyzer();
+        semantic.execute = false;
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
         return tokenize(parser);
     }
 
     public static ArrayList<ErrorStruct> checkSyntax(String stream) {
+        semantic = new SemanticAnalyzer();
+        semantic.execute = false;
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
         try {
@@ -42,6 +47,20 @@ public class LanguageParser {
         ArrayList tmp = new ArrayList<ErrorStruct>(output);
         output.clear();
         return tmp;
+    }
+
+    public static SemanticAnalyzer checkSemantic(String stream){
+        semantic = new SemanticAnalyzer();
+        semantic.execute = true;
+        InputStream target =  new ByteArrayInputStream(stream.getBytes());
+        LanguageParser parser = new LanguageParser(target);
+
+        try {
+            parser.begin_program();
+        } catch (ParseException e) {
+            return semantic;
+        }
+        return semantic;
     }
 
    public static LanguageParser create(String stream){
@@ -225,13 +244,9 @@ TOKEN : {
         ("")(<LETTER>|<DIGITS>|(""))*>
 }
 
-void enum_values(): {} {
-    constant_result() | <IDENTIFIER>
-}
-
 void inner_enum_declaration(RecoverySet r) : {} {
     try {
-        <IDENTIFIER> <IS> enum_values() inner_enum_decla_cont() <DOT>
+        <IDENTIFIER> {semantic.action3(token.image);} <IS> <IDENTIFIER> {semantic.action4(token.image);} inner_enum_decla_cont() <DOT>
     }
     catch (ParseException e){
            consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
@@ -240,7 +255,7 @@ void inner_enum_declaration(RecoverySet r) : {} {
 }
 
 void inner_enum_decla_cont() : {} {
-    (<COMMA> enum_values() inner_enum_decla_cont())?
+    (<COMMA> <IDENTIFIER> {semantic.action4(token.image);} inner_enum_decla_cont())?
 }
 void enum_declaration(RecoverySet r) : {} {
     try {
@@ -256,12 +271,18 @@ void enum_declaration(RecoverySet r) : {} {
 }
 
 void identifiers() : {} {
-    <IDENTIFIER> index()
-
-
+    <IDENTIFIER> {semantic.action10(token.image);} index() {semantic.action11();}
 }
 
-void identifiers_list() : {} {
+void item() : {} {
+    (<IDENTIFIER> {semantic.action24(token.image);} index() {semantic.action25();}) | <NUM> {semantic.action26(token.image);} | <NUMBER_REAL> {semantic.action27(token.image);} | <STRING_LITERAL> {semantic.action28(token.image);}
+}
+
+void constant_identifiers_list() : {} {
+    <IDENTIFIER> {semantic.action9(token.image);} (<COMMA> constant_identifiers_list())?
+}
+
+void variable_identifiers_list() : {} {
     try {
         identifiers() (<COMMA> identifiers())*
        }
@@ -271,37 +292,41 @@ void identifiers_list() : {} {
 
 }
 
+void general_identifiers_list() : {} {
+    item() {semantic.action23();} (<COMMA> general_identifiers_list())?
+}
+
 void type_declaration() : {} {
-    <INTEGER> | <REAL> | <STRING> | <LOGIC> | <ENUM>
+    <INTEGER> {semantic.action13();} | <REAL> {semantic.action14();} | <STRING> {semantic.action15();} | <LOGIC> {semantic.action16();} | <IDENTIFIER> {semantic.action17();}
 }
 
 
 void variable_declaration() : {} {
-    identifiers_list() <IS> type_declaration() <DOT>
+    variable_identifiers_list() <IS> type_declaration() {semantic.action6();} <DOT>
 }
 
 void type_constant() : {} {
-    <INTEGER> | <REAL> | <STRING> | <LOGIC>
+    <INTEGER> {semantic.action13();} | <REAL> {semantic.action14();} | <STRING> {semantic.action15();} | <LOGIC> {semantic.action16();} | <IDENTIFIER> {semantic.action17();}
 }
 
 void end_constant() : {} {
-    <AS> <CONSTANT> (constant_declaration())+
+    <AS> <CONSTANT> {semantic.action5();} (constant_declaration())+
 }
 
 void start_variable() : {} {
-    <VARIABLE> (variable_declaration())+ (end_constant())?
+    <VARIABLE> {semantic.action8();} (variable_declaration())+ (end_constant())?
 }
 
 void constant_declaration() : {} {
-    identifiers_list() <IS> type_constant() <ASSIGN> constant_result() <DOT>
+    constant_identifiers_list() <IS> type_constant() {semantic.action6();} <ASSIGN> constant_result() {semantic.action7(token);} <DOT>
 }
 
 void end_variable() : {} {
-    <AS> <VARIABLE> (variable_declaration())+
+    <AS> <VARIABLE> {semantic.action8();} (variable_declaration())+
 }
 
 void start_constant() : {} {
-    <CONSTANT> (constant_declaration())+ (end_variable())?
+    <CONSTANT> {semantic.action5();} (constant_declaration())+ (end_variable())?
 }
 
 void start_declaration(RecoverySet r) : {} {
@@ -340,7 +365,7 @@ void constant_result() : {} {
 
 void logic_result(RecoverySet r ) : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
     try {
-        <TRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> untrue_result_cont()
+        <TRUE> <RESULT> {semantic.action30();} <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> true_result_cont() | <UNTRUE> <RESULT> {semantic.action31();} <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> untrue_result_cont()
     }
    catch (ParseException e){
            consumeUntil(r, e, "");
@@ -350,7 +375,7 @@ void logic_result(RecoverySet r ) : {RecoverySet g = new RecoverySet(CLOSE_BRACK
 
 void true_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
     try {
-        (<UNTRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
+        (<UNTRUE> <RESULT> {semantic.action32();} <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
     }
    catch (ParseException e){
            consumeUntil(g, e, "list_of_commands");
@@ -361,7 +386,7 @@ void true_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
 
 void untrue_result_cont() : {RecoverySet g = new RecoverySet(CLOSE_BRACKET);} {
     try {
-        (<TRUE> <RESULT> <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
+        (<TRUE> <RESULT> {semantic.action32();} <OPEN_BRACKET> list_of_commands(g) <CLOSE_BRACKET> <DOT>) | <DOT>
     }
     catch (ParseException e){
         consumeUntil(g, e, "");
@@ -404,8 +429,8 @@ void arithmetic_or_logic_expression(RecoverySet g) : {} {
 }
 
 void expression_cont(RecoverySet g) : {} {
-    ((<EQUAL_TO> arithmetic_or_logic_expression(g)) | (<DIFF_THAN> arithmetic_or_logic_expression(g)) | (<LESS_THAN> arithmetic_or_logic_expression(g)) | (<GREATER_THAN> arithmetic_or_logic_expression(g))
-    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)) | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)))?
+    ((<EQUAL_TO> arithmetic_or_logic_expression(g)) {semantic.action36();} | (<DIFF_THAN> arithmetic_or_logic_expression(g)) {semantic.action37();} | (<LESS_THAN> arithmetic_or_logic_expression(g)) {semantic.action38();} | (<GREATER_THAN> arithmetic_or_logic_expression(g)) {semantic.action39();}
+    | (<LESS_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g)) {semantic.action40();} | (<GREATER_THAN_OR_EQ_TO> arithmetic_or_logic_expression(g) {semantic.action41();}))?
 }
 
 void first_term(RecoverySet g) : {} {
@@ -417,26 +442,26 @@ void second_term(RecoverySet g) : {} {
 }
 
 void element(RecoverySet g) : {} {
-    (<IDENTIFIER> index())
-    | <NUM> | <NUMBER_REAL> | <STRING_LITERAL>
-    | <TRUE> | <UNTRUE> | (<OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
-    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
+    (<IDENTIFIER> {semantic.action24(token.image);} index() {semantic.action51();})
+    | <NUM> {semantic.action26(token.image);} | <NUMBER_REAL> {semantic.action27(token.image);} | <STRING_LITERAL> {semantic.action28(token.image);}
+    | <TRUE> {semantic.action52();} | <UNTRUE> {semantic.action53();} | (<OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS>)
+    | (<LOGICAL_NOT> <OPEN_PARENTHESIS> expression(g) <CLOSE_PARENTHESIS> {semantic.action54();})
 }
 
 void index() : {} {
-    (<OPEN_CURLY_BRACKETS> <NUM> <CLOSE_CURLY_BRACKETS>)?
+    (<OPEN_CURLY_BRACKETS> <NUM> {semantic.action12(token.image);} <CLOSE_CURLY_BRACKETS>)?
 }
 
 void top_priority_operators(RecoverySet g) : {} {
-    (<POWER> element(g))*
+    (<POWER> element(g) {semantic.action50();} )*
 }
 
 void medium_priority_operators(RecoverySet g) : {} {
-    ((<MULTIPLY> first_term(g)) | (<DIV> first_term(g)) | (<WHOLE_DIV> first_term(g)) | (<REST_DIV> first_term(g)) | (<LOGICAL_AND> first_term(g)))*
+    ((<MULTIPLY> first_term(g)) {semantic.action45();} | (<DIV> first_term(g)) {semantic.action46();} | (<WHOLE_DIV> first_term(g)) {semantic.action47();} | (<REST_DIV> first_term(g)) {semantic.action48();} | (<LOGICAL_AND> first_term(g)) {semantic.action49();} )*
 }
 
 void lesser_priority_operators(RecoverySet g) : {} {
-    ((<PLUS> second_term(g)) | (<MINUS> second_term(g)) | (<LOGICAL_OR> second_term(g)))*
+    ((<PLUS> second_term(g)) {semantic.action42();} | (<MINUS> second_term(g)) {semantic.action43();} | (<LOGICAL_OR> second_term(g)) {semantic.action44();} )*
 }
 
 void repeat(RecoverySet r) : {
@@ -444,9 +469,9 @@ void repeat(RecoverySet r) : {
         RecoverySet h = new RecoverySet(CLOSE_BRACKET);
         } {
     try {
-        <REPEAT> <THIS> expression(g) <OPEN_BRACKET>
+        <REPEAT> <THIS> {semantic.action33();} expression(g) {semantic.action34();} <OPEN_BRACKET>
             list_of_commands(h)
-        <CLOSE_BRACKET> <DOT>
+        <CLOSE_BRACKET> {semantic.action35();} <DOT>
     }
     catch (ParseException e){
        consumeUntil(r, e, "");
@@ -457,7 +482,7 @@ void repeat(RecoverySet r) : {
 void avaliate(RecoverySet r) : {RecoverySet g = new RecoverySet(DOT);} {
     try {
     <AVALIATE> <THIS> expression(First.selection_command)
-        logic_result(g)
+        logic_result(g) {semantic.action29();}
     }
     catch (ParseException e){
            consumeUntil(r, e, "");
@@ -467,7 +492,7 @@ void avaliate(RecoverySet r) : {RecoverySet g = new RecoverySet(DOT);} {
 
 void write(RecoverySet g) : {} {
     try {
-        <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+        <THIS> {semantic.action22();} <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
     }
     catch (ParseException e){
         consumeUntil(g, e, "list_of_commands");
@@ -477,7 +502,7 @@ void write(RecoverySet g) : {} {
 
 void write_all(RecoverySet g) : {} {
     try {
-        <ALL> <THIS> <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
+        <ALL> <THIS> {semantic.action21();} <OPEN_BRACKET> write_body() <CLOSE_BRACKET> <DOT>
     }
    catch (ParseException e){
        consumeUntil(g, e, "");
@@ -488,7 +513,7 @@ void write_all(RecoverySet g) : {} {
 
 void write_body() : {} {
     try {
-         (constant_result()  (<COMMA> write_body_cont())* | identifiers()  (<COMMA> write_body_cont())*)
+         general_identifiers_list()
     }
    catch (ParseException e){
        output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
@@ -496,18 +521,9 @@ void write_body() : {} {
 
 }
 
-void write_body_cont() : {} {
-    try {
-        constant_result() | identifiers()
-    }
-    catch (ParseException e){
-        output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
-    }
-}
-
 void designate(RecoverySet r) : {RecoverySet h = new RecoverySet(DOT);} {
     try {
-        <DESIGNATE> <THIS> identifiers_list() <AS> expression(h) <DOT>
+        <DESIGNATE> <THIS> {semantic.action18();} variable_identifiers_list() <AS> expression(h) {semantic.action19();} <DOT>
     }
    catch (ParseException e){
        consumeUntil(r, e, "");
@@ -518,7 +534,7 @@ void designate(RecoverySet r) : {RecoverySet h = new RecoverySet(DOT);} {
 
 void read(RecoverySet r) : {} {
     try {
-        <READ> <THIS> <OPEN_BRACKET> identifiers_list() <CLOSE_BRACKET> <DOT>
+        <READ> <THIS> {semantic.action20();} <OPEN_BRACKET> variable_identifiers_list() <CLOSE_BRACKET> <DOT>
     }
     catch (ParseException e){
         consumeUntil(r, e, "read");
@@ -528,7 +544,7 @@ void read(RecoverySet r) : {} {
 
 void header(RecoverySet r) : {} {
     try {
-        <DO> <THIS> <IDENTIFIER> <OPEN_BRACKET> <CLOSE_BRACKET>
+        <DO> <THIS> <IDENTIFIER> {semantic.action1(token.image);} <OPEN_BRACKET> <CLOSE_BRACKET>
     }
     catch (ParseException e){
         consumeUntil(r, e, "header");
@@ -580,7 +596,7 @@ void main(RecoverySet r) : {
 
 void begin_program() : {RecoverySet r = new RecoverySet(EOF);} {
     try {
-        [ main(r) ] <EOF>
+        [ main(r) ] <EOF> {semantic.action2();}
     }
     catch (ParseException e){
         consumeUntil(r, e, "begin_program");

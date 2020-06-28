@@ -15,14 +15,19 @@ public class LanguageParser implements LanguageParserConstants {
     boolean debugRecovery = true;
     final static List<ErrorStruct> output = new ArrayList<ErrorStruct>();
     boolean eof;
+    public static SemanticAnalyzer semantic;
 
     public static List<Token> getTokens(String stream){
+        semantic = new SemanticAnalyzer();
+        semantic.execute = false;
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
         return tokenize(parser);
     }
 
     public static ArrayList<ErrorStruct> checkSyntax(String stream) {
+        semantic = new SemanticAnalyzer();
+        semantic.execute = false;
         InputStream target =  new ByteArrayInputStream(stream.getBytes());
         LanguageParser parser = new LanguageParser(target);
         try {
@@ -34,6 +39,20 @@ public class LanguageParser implements LanguageParserConstants {
         ArrayList tmp = new ArrayList<ErrorStruct>(output);
         output.clear();
         return tmp;
+    }
+
+    public static SemanticAnalyzer checkSemantic(String stream){
+        semantic = new SemanticAnalyzer();
+        semantic.execute = true;
+        InputStream target =  new ByteArrayInputStream(stream.getBytes());
+        LanguageParser parser = new LanguageParser(target);
+
+        try {
+            parser.begin_program();
+        } catch (ParseException e) {
+            return semantic;
+        }
+        return semantic;
     }
 
    public static LanguageParser create(String stream){
@@ -109,39 +128,16 @@ public class LanguageParser implements LanguageParserConstants {
         contParseError++;
     }
 
-  final public void enum_values() throws ParseException {
-    trace_call("enum_values");
-    try {
-
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case NUM:
-      case NUMBER_REAL:
-      case STRING_LITERAL:{
-        constant_result();
-        break;
-        }
-      case IDENTIFIER:{
-        jj_consume_token(IDENTIFIER);
-        break;
-        }
-      default:
-        jj_la1[0] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-    } finally {
-      trace_return("enum_values");
-    }
-}
-
   final public void inner_enum_declaration(RecoverySet r) throws ParseException {
     trace_call("inner_enum_declaration");
     try {
 
       try {
         jj_consume_token(IDENTIFIER);
+semantic.action3(token.image);
         jj_consume_token(IS);
-        enum_values();
+        jj_consume_token(IDENTIFIER);
+semantic.action4(token.image);
         inner_enum_decla_cont();
         jj_consume_token(DOT);
       } catch (ParseException e) {
@@ -160,12 +156,13 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case COMMA:{
         jj_consume_token(COMMA);
-        enum_values();
+        jj_consume_token(IDENTIFIER);
+semantic.action4(token.image);
         inner_enum_decla_cont();
         break;
         }
       default:
-        jj_la1[1] = jj_gen;
+        jj_la1[0] = jj_gen;
         ;
       }
     } finally {
@@ -189,7 +186,7 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
             break;
             }
           default:
-            jj_la1[2] = jj_gen;
+            jj_la1[1] = jj_gen;
             break label_1;
           }
         }
@@ -201,7 +198,7 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
           break;
           }
         default:
-          jj_la1[3] = jj_gen;
+          jj_la1[2] = jj_gen;
           ;
         }
       } catch (ParseException e) {
@@ -218,14 +215,74 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
     try {
 
       jj_consume_token(IDENTIFIER);
+semantic.action10(token.image);
       index();
+semantic.action11();
     } finally {
       trace_return("identifiers");
     }
 }
 
-  final public void identifiers_list() throws ParseException {
-    trace_call("identifiers_list");
+  final public void item() throws ParseException {
+    trace_call("item");
+    try {
+
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case IDENTIFIER:{
+        jj_consume_token(IDENTIFIER);
+semantic.action24(token.image);
+        index();
+semantic.action25();
+        break;
+        }
+      case NUM:{
+        jj_consume_token(NUM);
+semantic.action26(token.image);
+        break;
+        }
+      case NUMBER_REAL:{
+        jj_consume_token(NUMBER_REAL);
+semantic.action27(token.image);
+        break;
+        }
+      case STRING_LITERAL:{
+        jj_consume_token(STRING_LITERAL);
+semantic.action28(token.image);
+        break;
+        }
+      default:
+        jj_la1[3] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } finally {
+      trace_return("item");
+    }
+}
+
+  final public void constant_identifiers_list() throws ParseException {
+    trace_call("constant_identifiers_list");
+    try {
+
+      jj_consume_token(IDENTIFIER);
+semantic.action9(token.image);
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case COMMA:{
+        jj_consume_token(COMMA);
+        constant_identifiers_list();
+        break;
+        }
+      default:
+        jj_la1[4] = jj_gen;
+        ;
+      }
+    } finally {
+      trace_return("constant_identifiers_list");
+    }
+}
+
+  final public void variable_identifiers_list() throws ParseException {
+    trace_call("variable_identifiers_list");
     try {
 
       try {
@@ -238,7 +295,7 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
             break;
             }
           default:
-            jj_la1[4] = jj_gen;
+            jj_la1[5] = jj_gen;
             break label_2;
           }
           jj_consume_token(COMMA);
@@ -248,7 +305,28 @@ consumeUntil(r, e, "Error: Invalid enum declaration syntax.");
 output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
       }
     } finally {
-      trace_return("identifiers_list");
+      trace_return("variable_identifiers_list");
+    }
+}
+
+  final public void general_identifiers_list() throws ParseException {
+    trace_call("general_identifiers_list");
+    try {
+
+      item();
+semantic.action23();
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case COMMA:{
+        jj_consume_token(COMMA);
+        general_identifiers_list();
+        break;
+        }
+      default:
+        jj_la1[6] = jj_gen;
+        ;
+      }
+    } finally {
+      trace_return("general_identifiers_list");
     }
 }
 
@@ -259,26 +337,31 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case INTEGER:{
         jj_consume_token(INTEGER);
+semantic.action13();
         break;
         }
       case REAL:{
         jj_consume_token(REAL);
+semantic.action14();
         break;
         }
       case STRING:{
         jj_consume_token(STRING);
+semantic.action15();
         break;
         }
       case LOGIC:{
         jj_consume_token(LOGIC);
+semantic.action16();
         break;
         }
-      case ENUM:{
-        jj_consume_token(ENUM);
+      case IDENTIFIER:{
+        jj_consume_token(IDENTIFIER);
+semantic.action17();
         break;
         }
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[7] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -291,9 +374,10 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
     trace_call("variable_declaration");
     try {
 
-      identifiers_list();
+      variable_identifiers_list();
       jj_consume_token(IS);
       type_declaration();
+semantic.action6();
       jj_consume_token(DOT);
     } finally {
       trace_return("variable_declaration");
@@ -307,22 +391,31 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case INTEGER:{
         jj_consume_token(INTEGER);
+semantic.action13();
         break;
         }
       case REAL:{
         jj_consume_token(REAL);
+semantic.action14();
         break;
         }
       case STRING:{
         jj_consume_token(STRING);
+semantic.action15();
         break;
         }
       case LOGIC:{
         jj_consume_token(LOGIC);
+semantic.action16();
+        break;
+        }
+      case IDENTIFIER:{
+        jj_consume_token(IDENTIFIER);
+semantic.action17();
         break;
         }
       default:
-        jj_la1[6] = jj_gen;
+        jj_la1[8] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -337,6 +430,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
 
       jj_consume_token(AS);
       jj_consume_token(CONSTANT);
+semantic.action5();
       label_3:
       while (true) {
         constant_declaration();
@@ -346,7 +440,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
           break;
           }
         default:
-          jj_la1[7] = jj_gen;
+          jj_la1[9] = jj_gen;
           break label_3;
         }
       }
@@ -360,6 +454,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
     try {
 
       jj_consume_token(VARIABLE);
+semantic.action8();
       label_4:
       while (true) {
         variable_declaration();
@@ -369,7 +464,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
           break;
           }
         default:
-          jj_la1[8] = jj_gen;
+          jj_la1[10] = jj_gen;
           break label_4;
         }
       }
@@ -379,7 +474,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
         break;
         }
       default:
-        jj_la1[9] = jj_gen;
+        jj_la1[11] = jj_gen;
         ;
       }
     } finally {
@@ -391,11 +486,13 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
     trace_call("constant_declaration");
     try {
 
-      identifiers_list();
+      constant_identifiers_list();
       jj_consume_token(IS);
       type_constant();
+semantic.action6();
       jj_consume_token(ASSIGN);
       constant_result();
+semantic.action7(token);
       jj_consume_token(DOT);
     } finally {
       trace_return("constant_declaration");
@@ -408,6 +505,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
 
       jj_consume_token(AS);
       jj_consume_token(VARIABLE);
+semantic.action8();
       label_5:
       while (true) {
         variable_declaration();
@@ -417,7 +515,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
           break;
           }
         default:
-          jj_la1[10] = jj_gen;
+          jj_la1[12] = jj_gen;
           break label_5;
         }
       }
@@ -431,6 +529,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
     try {
 
       jj_consume_token(CONSTANT);
+semantic.action5();
       label_6:
       while (true) {
         constant_declaration();
@@ -440,7 +539,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
           break;
           }
         default:
-          jj_la1[11] = jj_gen;
+          jj_la1[13] = jj_gen;
           break label_6;
         }
       }
@@ -450,7 +549,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
         break;
         }
       default:
-        jj_la1[12] = jj_gen;
+        jj_la1[14] = jj_gen;
         ;
       }
     } finally {
@@ -473,7 +572,7 @@ output.add(new ErrorStruct("Erro: Lista de identificadores incorreto.\n", e));
           break;
           }
         default:
-          jj_la1[13] = jj_gen;
+          jj_la1[15] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -540,7 +639,7 @@ consumeUntil(r, e, "declaration_constants_and_variables");
         break;
         }
       default:
-        jj_la1[14] = jj_gen;
+        jj_la1[16] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -558,6 +657,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
         case TRUE:{
           jj_consume_token(TRUE);
           jj_consume_token(RESULT);
+semantic.action30();
           jj_consume_token(OPEN_BRACKET);
           list_of_commands(g);
           jj_consume_token(CLOSE_BRACKET);
@@ -567,6 +667,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
         case UNTRUE:{
           jj_consume_token(UNTRUE);
           jj_consume_token(RESULT);
+semantic.action31();
           jj_consume_token(OPEN_BRACKET);
           list_of_commands(g);
           jj_consume_token(CLOSE_BRACKET);
@@ -574,7 +675,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
           break;
           }
         default:
-          jj_la1[15] = jj_gen;
+          jj_la1[17] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -596,6 +697,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
         case UNTRUE:{
           jj_consume_token(UNTRUE);
           jj_consume_token(RESULT);
+semantic.action32();
           jj_consume_token(OPEN_BRACKET);
           list_of_commands(g);
           jj_consume_token(CLOSE_BRACKET);
@@ -607,7 +709,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
           break;
           }
         default:
-          jj_la1[16] = jj_gen;
+          jj_la1[18] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -629,6 +731,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
         case TRUE:{
           jj_consume_token(TRUE);
           jj_consume_token(RESULT);
+semantic.action32();
           jj_consume_token(OPEN_BRACKET);
           list_of_commands(g);
           jj_consume_token(CLOSE_BRACKET);
@@ -640,7 +743,7 @@ RecoverySet g = new RecoverySet(CLOSE_BRACKET);
           break;
           }
         default:
-          jj_la1[17] = jj_gen;
+          jj_la1[19] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -671,14 +774,14 @@ consumeUntil(g, e, "");
             break;
             }
           default:
-            jj_la1[18] = jj_gen;
+            jj_la1[20] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
           break;
           }
         default:
-          jj_la1[19] = jj_gen;
+          jj_la1[21] = jj_gen;
           ;
         }
       } catch (ParseException e) {
@@ -718,7 +821,7 @@ RecoverySet g = First.list_of_commands ;
               break;
               }
             default:
-              jj_la1[20] = jj_gen;
+              jj_la1[22] = jj_gen;
               jj_consume_token(-1);
               throw new ParseException();
             }
@@ -733,7 +836,7 @@ RecoverySet g = First.list_of_commands ;
             break;
             }
           default:
-            jj_la1[21] = jj_gen;
+            jj_la1[23] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
@@ -747,7 +850,7 @@ RecoverySet g = First.list_of_commands ;
             break;
             }
           default:
-            jj_la1[22] = jj_gen;
+            jj_la1[24] = jj_gen;
             break label_7;
           }
         }
@@ -802,42 +905,48 @@ consumeUntil(g, e, "list_of_commands");
         case EQUAL_TO:{
           jj_consume_token(EQUAL_TO);
           arithmetic_or_logic_expression(g);
+semantic.action36();
           break;
           }
         case DIFF_THAN:{
           jj_consume_token(DIFF_THAN);
           arithmetic_or_logic_expression(g);
+semantic.action37();
           break;
           }
         case LESS_THAN:{
           jj_consume_token(LESS_THAN);
           arithmetic_or_logic_expression(g);
+semantic.action38();
           break;
           }
         case GREATER_THAN:{
           jj_consume_token(GREATER_THAN);
           arithmetic_or_logic_expression(g);
+semantic.action39();
           break;
           }
         case LESS_THAN_OR_EQ_TO:{
           jj_consume_token(LESS_THAN_OR_EQ_TO);
           arithmetic_or_logic_expression(g);
+semantic.action40();
           break;
           }
         case GREATER_THAN_OR_EQ_TO:{
           jj_consume_token(GREATER_THAN_OR_EQ_TO);
           arithmetic_or_logic_expression(g);
+semantic.action41();
           break;
           }
         default:
-          jj_la1[23] = jj_gen;
+          jj_la1[25] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
         break;
         }
       default:
-        jj_la1[24] = jj_gen;
+        jj_la1[26] = jj_gen;
         ;
       }
     } finally {
@@ -874,27 +983,34 @@ consumeUntil(g, e, "list_of_commands");
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENTIFIER:{
         jj_consume_token(IDENTIFIER);
+semantic.action24(token.image);
         index();
+semantic.action51();
         break;
         }
       case NUM:{
         jj_consume_token(NUM);
+semantic.action26(token.image);
         break;
         }
       case NUMBER_REAL:{
         jj_consume_token(NUMBER_REAL);
+semantic.action27(token.image);
         break;
         }
       case STRING_LITERAL:{
         jj_consume_token(STRING_LITERAL);
+semantic.action28(token.image);
         break;
         }
       case TRUE:{
         jj_consume_token(TRUE);
+semantic.action52();
         break;
         }
       case UNTRUE:{
         jj_consume_token(UNTRUE);
+semantic.action53();
         break;
         }
       case OPEN_PARENTHESIS:{
@@ -908,10 +1024,11 @@ consumeUntil(g, e, "list_of_commands");
         jj_consume_token(OPEN_PARENTHESIS);
         expression(g);
         jj_consume_token(CLOSE_PARENTHESIS);
+semantic.action54();
         break;
         }
       default:
-        jj_la1[25] = jj_gen;
+        jj_la1[27] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -928,11 +1045,12 @@ consumeUntil(g, e, "list_of_commands");
       case OPEN_CURLY_BRACKETS:{
         jj_consume_token(OPEN_CURLY_BRACKETS);
         jj_consume_token(NUM);
+semantic.action12(token.image);
         jj_consume_token(CLOSE_CURLY_BRACKETS);
         break;
         }
       default:
-        jj_la1[26] = jj_gen;
+        jj_la1[28] = jj_gen;
         ;
       }
     } finally {
@@ -952,11 +1070,12 @@ consumeUntil(g, e, "list_of_commands");
           break;
           }
         default:
-          jj_la1[27] = jj_gen;
+          jj_la1[29] = jj_gen;
           break label_8;
         }
         jj_consume_token(POWER);
         element(g);
+semantic.action50();
       }
     } finally {
       trace_return("top_priority_operators");
@@ -979,37 +1098,42 @@ consumeUntil(g, e, "list_of_commands");
           break;
           }
         default:
-          jj_la1[28] = jj_gen;
+          jj_la1[30] = jj_gen;
           break label_9;
         }
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case MULTIPLY:{
           jj_consume_token(MULTIPLY);
           first_term(g);
+semantic.action45();
           break;
           }
         case DIV:{
           jj_consume_token(DIV);
           first_term(g);
+semantic.action46();
           break;
           }
         case WHOLE_DIV:{
           jj_consume_token(WHOLE_DIV);
           first_term(g);
+semantic.action47();
           break;
           }
         case REST_DIV:{
           jj_consume_token(REST_DIV);
           first_term(g);
+semantic.action48();
           break;
           }
         case LOGICAL_AND:{
           jj_consume_token(LOGICAL_AND);
           first_term(g);
+semantic.action49();
           break;
           }
         default:
-          jj_la1[29] = jj_gen;
+          jj_la1[31] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1033,27 +1157,30 @@ consumeUntil(g, e, "list_of_commands");
           break;
           }
         default:
-          jj_la1[30] = jj_gen;
+          jj_la1[32] = jj_gen;
           break label_10;
         }
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case PLUS:{
           jj_consume_token(PLUS);
           second_term(g);
+semantic.action42();
           break;
           }
         case MINUS:{
           jj_consume_token(MINUS);
           second_term(g);
+semantic.action43();
           break;
           }
         case LOGICAL_OR:{
           jj_consume_token(LOGICAL_OR);
           second_term(g);
+semantic.action44();
           break;
           }
         default:
-          jj_la1[31] = jj_gen;
+          jj_la1[33] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1071,10 +1198,13 @@ RecoverySet g = new RecoverySet(OPEN_BRACKET);
       try {
         jj_consume_token(REPEAT);
         jj_consume_token(THIS);
+semantic.action33();
         expression(g);
+semantic.action34();
         jj_consume_token(OPEN_BRACKET);
         list_of_commands(h);
         jj_consume_token(CLOSE_BRACKET);
+semantic.action35();
         jj_consume_token(DOT);
       } catch (ParseException e) {
 consumeUntil(r, e, "");
@@ -1094,6 +1224,7 @@ RecoverySet g = new RecoverySet(DOT);
         jj_consume_token(THIS);
         expression(First.selection_command);
         logic_result(g);
+semantic.action29();
       } catch (ParseException e) {
 consumeUntil(r, e, "");
            output.add(new ErrorStruct("Erro: Declara\u00e7\u00e3o do comando avaliate incorreta. \n", e));
@@ -1109,6 +1240,7 @@ consumeUntil(r, e, "");
 
       try {
         jj_consume_token(THIS);
+semantic.action22();
         jj_consume_token(OPEN_BRACKET);
         write_body();
         jj_consume_token(CLOSE_BRACKET);
@@ -1129,6 +1261,7 @@ consumeUntil(g, e, "list_of_commands");
       try {
         jj_consume_token(ALL);
         jj_consume_token(THIS);
+semantic.action21();
         jj_consume_token(OPEN_BRACKET);
         write_body();
         jj_consume_token(CLOSE_BRACKET);
@@ -1147,84 +1280,12 @@ consumeUntil(g, e, "");
     try {
 
       try {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case NUM:
-        case NUMBER_REAL:
-        case STRING_LITERAL:{
-          constant_result();
-          label_11:
-          while (true) {
-            switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-            case COMMA:{
-              ;
-              break;
-              }
-            default:
-              jj_la1[32] = jj_gen;
-              break label_11;
-            }
-            jj_consume_token(COMMA);
-            write_body_cont();
-          }
-          break;
-          }
-        case IDENTIFIER:{
-          identifiers();
-          label_12:
-          while (true) {
-            switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-            case COMMA:{
-              ;
-              break;
-              }
-            default:
-              jj_la1[33] = jj_gen;
-              break label_12;
-            }
-            jj_consume_token(COMMA);
-            write_body_cont();
-          }
-          break;
-          }
-        default:
-          jj_la1[34] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
+        general_identifiers_list();
       } catch (ParseException e) {
 output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
       }
     } finally {
       trace_return("write_body");
-    }
-}
-
-  final public void write_body_cont() throws ParseException {
-    trace_call("write_body_cont");
-    try {
-
-      try {
-        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-        case NUM:
-        case NUMBER_REAL:
-        case STRING_LITERAL:{
-          constant_result();
-          break;
-          }
-        case IDENTIFIER:{
-          identifiers();
-          break;
-          }
-        default:
-          jj_la1[35] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-      } catch (ParseException e) {
-output.add(new ErrorStruct("Erro: Erro no corpo do write.\n", e));
-      }
-    } finally {
-      trace_return("write_body_cont");
     }
 }
 
@@ -1235,9 +1296,11 @@ RecoverySet h = new RecoverySet(DOT);
       try {
         jj_consume_token(DESIGNATE);
         jj_consume_token(THIS);
-        identifiers_list();
+semantic.action18();
+        variable_identifiers_list();
         jj_consume_token(AS);
         expression(h);
+semantic.action19();
         jj_consume_token(DOT);
       } catch (ParseException e) {
 consumeUntil(r, e, "");
@@ -1255,8 +1318,9 @@ consumeUntil(r, e, "");
       try {
         jj_consume_token(READ);
         jj_consume_token(THIS);
+semantic.action20();
         jj_consume_token(OPEN_BRACKET);
-        identifiers_list();
+        variable_identifiers_list();
         jj_consume_token(CLOSE_BRACKET);
         jj_consume_token(DOT);
       } catch (ParseException e) {
@@ -1275,6 +1339,7 @@ consumeUntil(r, e, "read");
         jj_consume_token(DO);
         jj_consume_token(THIS);
         jj_consume_token(IDENTIFIER);
+semantic.action1(token.image);
         jj_consume_token(OPEN_BRACKET);
         jj_consume_token(CLOSE_BRACKET);
       } catch (ParseException e) {
@@ -1316,7 +1381,7 @@ consumeUntil(r, e, "body");
           break;
           }
         default:
-          jj_la1[36] = jj_gen;
+          jj_la1[34] = jj_gen;
           ;
         }
       } catch (ParseException e) {
@@ -1359,10 +1424,11 @@ RecoverySet r = new RecoverySet(EOF);
           break;
           }
         default:
-          jj_la1[37] = jj_gen;
+          jj_la1[35] = jj_gen;
           ;
         }
         jj_consume_token(0);
+semantic.action2();
       } catch (ParseException e) {
 consumeUntil(r, e, "begin_program");
         output.add(new ErrorStruct("Erro: Forma geral do programa incorreto.\n", e));
@@ -1381,7 +1447,7 @@ consumeUntil(r, e, "begin_program");
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[38];
+  final private int[] jj_la1 = new int[36];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1391,13 +1457,13 @@ consumeUntil(r, e, "begin_program");
 	   jj_la1_init_2();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x0,0x0,0x0,0x20000000,0x0,0x80000700,0x700,0x0,0x0,0x40000,0x0,0x0,0x40000,0x300000,0x0,0x1800,0x1000,0x800,0x40100000,0x20000000,0x2004000,0x15c00000,0x15c00000,0x0,0x0,0x1800,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x2000,};
+	   jj_la1_0 = new int[] {0x0,0x0,0x20000000,0x0,0x0,0x0,0x0,0x700,0x700,0x0,0x0,0x40000,0x0,0x0,0x40000,0x300000,0x0,0x1800,0x1000,0x800,0x40100000,0x20000000,0x2004000,0x15c00000,0x15c00000,0x0,0x0,0x1800,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x2000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x64000000,0x200000,0x4000000,0x0,0x200000,0x2000000,0x2000000,0x4000000,0x4000000,0x0,0x4000000,0x4000000,0x0,0x0,0x60000000,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x3e80,0x3e80,0x65010000,0x40000,0x10,0x40006c,0x40006c,0x800003,0x800003,0x200000,0x200000,0x64000000,0x64000000,0x0,0x0,};
+	   jj_la1_1 = new int[] {0x200000,0x4000000,0x0,0x64000000,0x200000,0x200000,0x200000,0x6000000,0x6000000,0x4000000,0x4000000,0x0,0x4000000,0x4000000,0x0,0x0,0x60000000,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x3e80,0x3e80,0x65010000,0x40000,0x10,0x40006c,0x40006c,0x800003,0x800003,0x0,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x1,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   {
@@ -1414,7 +1480,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1428,7 +1494,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1438,7 +1504,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1456,7 +1522,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1465,7 +1531,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1474,7 +1540,7 @@ consumeUntil(r, e, "begin_program");
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 38; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 36; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -1532,7 +1598,7 @@ consumeUntil(r, e, "begin_program");
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 38; i++) {
+	 for (int i = 0; i < 36; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
