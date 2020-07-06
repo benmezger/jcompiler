@@ -189,6 +189,7 @@ public class Controller implements Initializable {
             System.out.println(semantic.getListaDeErrosAsString());
         }
         else {
+            System.out.println(semantic.getInstructions());
             showInstructionPopup(semantic.getInstructions());
         }
     }
@@ -200,7 +201,7 @@ public class Controller implements Initializable {
 
         for (int i = 0; i < instructions.size(); i++){
             Instruction inst = instructions.get(i);
-            String msg = String.valueOf(inst.getPointer()) + "\t\t" + inst.getCode() + "\t" + inst.getParameter().toString() + "\n";
+            String msg = String.valueOf(inst.getPointer()) + "\t\t" + inst.getCode() + "\t\t" + inst.getParameter().getObj() + "\n";
             popup.write(msg);
         }
         popup.popup();
